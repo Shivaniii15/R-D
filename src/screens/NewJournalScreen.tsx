@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { saveJournal } from '../storage/journal.storage';
 import { JournalStackParamList } from '../navigation/JournalNavigator';
+import { journalStyles as styles } from '../styles/journal.styles';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'NewJournal'>;
 
@@ -25,16 +16,15 @@ export default function NewJournalScreen(): React.JSX.Element {
 
   async function handleSave() {
     if (!title.trim()) {
-      Alert.alert('Title required', 'Please enter a title for your journal.');
+      Alert.alert('Title required', 'Please enter a title.');
       return;
     }
-    const journal = {
+    await saveJournal({
       id: Date.now().toString(),
       title: title.trim(),
       body: body.trim(),
       createdAt: new Date().toISOString(),
-    };
-    await saveJournal(journal);
+    });
     navigation.goBack();
   }
 
@@ -46,13 +36,10 @@ export default function NewJournalScreen(): React.JSX.Element {
         </TouchableOpacity>
         <Text style={styles.heading}>New Journal</Text>
         <TouchableOpacity onPress={handleSave}>
-          <Text style={styles.save}>Save</Text>
+          <Text style={styles.saveText}>Save</Text>
         </TouchableOpacity>
       </View>
-
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.form}>
           <TextInput
             style={styles.titleInput}
@@ -77,54 +64,3 @@ export default function NewJournalScreen(): React.JSX.Element {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  heading: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#111',
-  },
-  cancel: {
-    fontSize: 15,
-    color: '#aaa',
-  },
-  save: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111',
-  },
-  form: {
-    padding: 20,
-    flexGrow: 1,
-  },
-  titleInput: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#111',
-    paddingVertical: 8,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 12,
-  },
-  bodyInput: {
-    fontSize: 16,
-    color: '#333',
-    lineHeight: 24,
-    minHeight: 300,
-  },
-});

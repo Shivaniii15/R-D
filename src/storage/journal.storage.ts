@@ -22,6 +22,16 @@ export async function saveJournal(journal: Journal): Promise<void> {
   }
 }
 
+export async function updateJournal(updated: Journal): Promise<void> {
+  try {
+    const existing = await getJournals();
+    const journals = existing.map(j => (j.id === updated.id ? updated : j));
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(journals));
+  } catch {
+    console.error('Failed to update journal');
+  }
+}
+
 export async function deleteJournal(id: string): Promise<void> {
   try {
     const existing = await getJournals();

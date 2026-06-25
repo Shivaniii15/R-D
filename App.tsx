@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
-import AppNavigator from './scr/navigation/Appnavigator';
+import AppNavigator from './src/navigation/AppNavigator';
 
 export default function App(): React.JSX.Element {
   return (
