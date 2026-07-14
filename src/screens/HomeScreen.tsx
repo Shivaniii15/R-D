@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
@@ -19,6 +20,14 @@ import { MoodEntry } from '../types/mood.types';
 import { homeStyles as styles } from '../styles/home.styles';
 
 const screenWidth = Dimensions.get('window').width;
+
+const EMOJIS = [
+  { emoji: '😢', value: 2, label: 'Terrible' },
+  { emoji: '😕', value: 4, label: 'Bad' },
+  { emoji: '😐', value: 6, label: 'Okay' },
+  { emoji: '🙂', value: 8, label: 'Good' },
+  { emoji: '😄', value: 10, label: 'Great' },
+];
 
 export default function HomeScreen(): React.JSX.Element {
   const [mood, setMood] = useState(5);
@@ -53,8 +62,17 @@ export default function HomeScreen(): React.JSX.Element {
     <SafeAreaView style={styles.container}>
       <ScrollView>
         <View style={styles.header}>
-          <Text style={styles.heading}>Mood logging.</Text>
-          <Text style={styles.subheading}>How are you feeling today?</Text>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.heading}>Mood logging.</Text>
+              <Text style={styles.subheading}>How are you feeling today?</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.exitButton}
+              onPress={() => BackHandler.exitApp()}>
+              <Text style={styles.exitButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Mood Slider */}
@@ -63,8 +81,26 @@ export default function HomeScreen(): React.JSX.Element {
           <Text style={styles.moodValue}>
             {alreadyLogged ? todaysMood : mood}/10
           </Text>
+
           {!alreadyLogged && (
             <>
+              {/* Emoji Quick Select */}
+              <View style={styles.emojiRow}>
+                {EMOJIS.map(item => (
+                  <TouchableOpacity
+                    key={item.value}
+                    style={[
+                      styles.emojiButton,
+                      mood === item.value && styles.emojiButtonSelected,
+                    ]}
+                    onPress={() => setMood(item.value)}>
+                    <Text style={styles.emojiText}>{item.emoji}</Text>
+                    <Text style={styles.emojiLabel}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Slider */}
               <Slider
                 minimumValue={1}
                 maximumValue={10}
