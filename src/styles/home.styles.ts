@@ -81,4 +81,18 @@ export const homeStyles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 20,
   },
+  historyButton: {
+  marginHorizontal: 20,
+  marginTop: 12,
+  paddingVertical: 14,
+  borderWidth: 1,
+  borderColor: '#111',
+  borderRadius: 12,
+  alignItems: 'center',
+},
+historyButtonText: {
+  color: '#111',
+  fontSize: 15,
+  fontWeight: '600',
+},
 });

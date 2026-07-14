@@ -9,21 +9,34 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { LineChart } from 'react-native-chart-kit';
-import { useFocusEffect } from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import {
   getTodaysMood,
   saveMoodEntry,
   getWeekMoods,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
+import { HomeStackParamList } from '../navigation/HomeNavigator';
 import { homeStyles as styles } from '../styles/home.styles';
 
 const screenWidth = Dimensions.get('window').width;
+
+type HomeNavigationProp = NativeStackNavigationProp<
+  HomeStackParamList,
+  'HomeMain'
+>;
 
 export default function HomeScreen(): React.JSX.Element {
   const [mood, setMood] = useState(5);
   const [todaysMood, setTodaysMood] = useState<number | null>(null);
   const [weekMoods, setWeekMoods] = useState<MoodEntry[]>([]);
+
+  const navigation = useNavigation<HomeNavigationProp>();
 
   useFocusEffect(
     useCallback(() => {
@@ -32,37 +45,50 @@ export default function HomeScreen(): React.JSX.Element {
     }, []),
   );
 
-  async function handleSave() {
+  async function handleSave(): Promise<void> {
     const today = new Date().toISOString().split('T')[0];
-    await saveMoodEntry({ date: today, mood });
+
+    await saveMoodEntry({
+      date: today,
+      mood,
+    });
+
     setTodaysMood(mood);
-    getWeekMoods().then(setWeekMoods);
+
+    const updatedWeekMoods = await getWeekMoods();
+    setWeekMoods(updatedWeekMoods);
   }
 
   const alreadyLogged = todaysMood !== null;
 
-  const chartLabels = weekMoods.map(e => {
-    const date = new Date(e.date + 'T00:00:00');
-    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+  const chartLabels = weekMoods.map(entry => {
+    const date = new Date(`${entry.date}T00:00:00`);
+
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
+      date.getDay()
+    ];
   });
 
-  const chartData = weekMoods.map(e => e.mood);
-  const hasAnyData = chartData.some(v => v > 0);
+  const chartData = weekMoods.map(entry => entry.mood);
+  const hasAnyData = chartData.some(value => value > 0);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.heading}>Mood logging.</Text>
-          <Text style={styles.subheading}>How are you feeling today?</Text>
+          <Text style={styles.subheading}>
+            How are you feeling today?
+          </Text>
         </View>
 
-        {/* Mood Slider */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Mood</Text>
+          <Text style={styles.sectionTitle}>Today&apos;s Mood</Text>
+
           <Text style={styles.moodValue}>
             {alreadyLogged ? todaysMood : mood}/10
           </Text>
+
           {!alreadyLogged && (
             <>
               <Slider
@@ -75,6 +101,7 @@ export default function HomeScreen(): React.JSX.Element {
                 maximumTrackTintColor="#e0e0e0"
                 thumbTintColor="#111"
               />
+
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>1</Text>
                 <Text style={styles.sliderLabel}>10</Text>
@@ -83,24 +110,43 @@ export default function HomeScreen(): React.JSX.Element {
           )}
         </View>
 
-        {/* Save Button */}
         {alreadyLogged ? (
-          <Text style={styles.savedText}>✓ Mood logged for today</Text>
+          <Text style={styles.savedText}>
+            ✓ Mood logged for today
+          </Text>
         ) : (
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <TouchableOpacity
+            style={styles.saveButton}
+            activeOpacity={0.8}
+            onPress={handleSave}>
             <Text style={styles.saveButtonText}>Log Mood</Text>
           </TouchableOpacity>
         )}
 
-        {/* Weekly Chart */}
+        <TouchableOpacity
+          style={styles.historyButton}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('MoodHistory')}>
+          <Text style={styles.historyButtonText}>
+            View Mood History
+          </Text>
+        </TouchableOpacity>
+
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>This Week</Text>
+
           {hasAnyData ? (
             <View style={styles.chartContainer}>
               <LineChart
                 data={{
                   labels: chartLabels,
-                  datasets: [{ data: chartData.map(v => (v === 0 ? 1 : v)) }],
+                  datasets: [
+                    {
+                      data: chartData.map(value =>
+                        value === 0 ? 1 : value,
+                      ),
+                    },
+                  ],
                 }}
                 width={screenWidth - 40}
                 height={200}
@@ -124,7 +170,9 @@ export default function HomeScreen(): React.JSX.Element {
                   },
                 }}
                 bezier
-                style={{ borderRadius: 12 }}
+                style={{
+                  borderRadius: 12,
+                }}
               />
             </View>
           ) : (

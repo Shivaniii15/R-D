@@ -5,10 +5,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
 
-import HomeScreen from '../screens/HomeScreen';
+import HomeScreen from './HomeNavigator';
 import JournalNavigator from './JournalNavigator';
 import Tab3Screen from '../screens/Tab3Screen';
 import { navigationStyles } from '../styles/Navigation.styles';
+import HomeNavigator from './HomeNavigator';
 
 type TabName = 'Home' | 'Journal' | 'Tab3';
 
@@ -46,7 +47,7 @@ export default function AppNavigator(): React.JSX.Element {
           tabBarStyle: navigationStyles.tabBar,
           tabBarItemStyle: navigationStyles.tabBarItem,
         })}>
-        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Home" component={HomeNavigator} />
         <Tab.Screen name="Journal" component={JournalNavigator} />
         <Tab.Screen name="Tab3" component={Tab3Screen} />
       </Tab.Navigator>
