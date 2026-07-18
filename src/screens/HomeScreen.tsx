@@ -10,59 +10,109 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { LineChart } from 'react-native-chart-kit';
 import { useFocusEffect } from '@react-navigation/native';
+
 import {
   getTodaysMood,
   saveMoodEntry,
   getWeekMoods,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
+import {
+  cancelMoodReminder,
+  updateMoodReminder,
+} from '../services/notification.service';
 import { homeStyles as styles } from '../styles/home.styles';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function HomeScreen(): React.JSX.Element {
   const [mood, setMood] = useState(5);
-  const [todaysMood, setTodaysMood] = useState<number | null>(null);
-  const [weekMoods, setWeekMoods] = useState<MoodEntry[]>([]);
+  const [todaysMood, setTodaysMood] =
+    useState<number | null>(null);
+  const [weekMoods, setWeekMoods] =
+    useState<MoodEntry[]>([]);
 
   useFocusEffect(
     useCallback(() => {
-      getTodaysMood().then(setTodaysMood);
-      getWeekMoods().then(setWeekMoods);
+      async function loadMoodData(): Promise<void> {
+        try {
+          const savedTodaysMood = await getTodaysMood();
+          const savedWeekMoods = await getWeekMoods();
+
+          setTodaysMood(savedTodaysMood);
+          setWeekMoods(savedWeekMoods);
+
+          /*
+           * Recheck the reminder whenever the Home screen becomes
+           * active.
+           */
+          await updateMoodReminder();
+        } catch (error) {
+          console.error('Failed to load mood data:', error);
+        }
+      }
+
+      loadMoodData();
     }, []),
   );
 
-  async function handleSave() {
-    const today = new Date().toISOString().split('T')[0];
-    await saveMoodEntry({ date: today, mood });
-    setTodaysMood(mood);
-    getWeekMoods().then(setWeekMoods);
+  async function handleSave(): Promise<void> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      await saveMoodEntry({
+        date: today,
+        mood,
+      });
+
+      setTodaysMood(mood);
+
+      /*
+       * The user has now logged today's mood, so any pending
+       * reminder should be cancelled.
+       */
+      await cancelMoodReminder();
+
+      const updatedWeekMoods = await getWeekMoods();
+      setWeekMoods(updatedWeekMoods);
+    } catch (error) {
+      console.error('Failed to save mood:', error);
+    }
   }
 
   const alreadyLogged = todaysMood !== null;
 
-  const chartLabels = weekMoods.map(e => {
-    const date = new Date(e.date + 'T00:00:00');
-    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+  const chartLabels = weekMoods.map(entry => {
+    const date = new Date(`${entry.date}T00:00:00`);
+
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
+      date.getDay()
+    ];
   });
 
-  const chartData = weekMoods.map(e => e.mood);
-  const hasAnyData = chartData.some(v => v > 0);
+  const chartData = weekMoods.map(entry => entry.mood);
+  const hasAnyData = chartData.some(value => value > 0);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.heading}>Mood logging.</Text>
-          <Text style={styles.subheading}>How are you feeling today?</Text>
+
+          <Text style={styles.subheading}>
+            How are you feeling today?
+          </Text>
         </View>
 
-        {/* Mood Slider */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Mood</Text>
+          <Text style={styles.sectionTitle}>
+            Today&apos;s Mood
+          </Text>
+
           <Text style={styles.moodValue}>
             {alreadyLogged ? todaysMood : mood}/10
           </Text>
+
           {!alreadyLogged && (
             <>
               <Slider
@@ -75,6 +125,7 @@ export default function HomeScreen(): React.JSX.Element {
                 maximumTrackTintColor="#e0e0e0"
                 thumbTintColor="#111"
               />
+
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>1</Text>
                 <Text style={styles.sliderLabel}>10</Text>
@@ -83,24 +134,36 @@ export default function HomeScreen(): React.JSX.Element {
           )}
         </View>
 
-        {/* Save Button */}
         {alreadyLogged ? (
-          <Text style={styles.savedText}>✓ Mood logged for today</Text>
+          <Text style={styles.savedText}>
+            ✓ Mood logged for today
+          </Text>
         ) : (
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Log Mood</Text>
+          <TouchableOpacity
+            style={styles.saveButton}
+            activeOpacity={0.8}
+            onPress={handleSave}>
+            <Text style={styles.saveButtonText}>
+              Log Mood
+            </Text>
           </TouchableOpacity>
         )}
 
-        {/* Weekly Chart */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>This Week</Text>
+
           {hasAnyData ? (
             <View style={styles.chartContainer}>
               <LineChart
                 data={{
                   labels: chartLabels,
-                  datasets: [{ data: chartData.map(v => (v === 0 ? 1 : v)) }],
+                  datasets: [
+                    {
+                      data: chartData.map(value =>
+                        value === 0 ? 1 : value,
+                      ),
+                    },
+                  ],
                 }}
                 width={screenWidth - 40}
                 height={200}
@@ -124,7 +187,9 @@ export default function HomeScreen(): React.JSX.Element {
                   },
                 }}
                 bezier
-                style={{ borderRadius: 12 }}
+                style={{
+                  borderRadius: 12,
+                }}
               />
             </View>
           ) : (
