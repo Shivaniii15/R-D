@@ -6,6 +6,8 @@ import React, {
 import {
   ActivityIndicator,
   Alert,
+  Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -14,10 +16,17 @@ import {
   View,
 } from 'react-native';
 
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from '@react-native-community/datetimepicker';
+
 import { useFocusEffect } from '@react-navigation/native';
 
 import {
+  getReminderTime,
   getRemindersEnabled,
+  ReminderTime,
+  setReminderTime,
   setRemindersEnabled,
 } from '../storage/reminderPreferences.storage';
 
@@ -32,31 +41,40 @@ export default function SettingsScreen(): React.JSX.Element {
     setLocalRemindersEnabled,
   ] = useState<boolean>(true);
 
+  const [selectedTime, setSelectedTime] =
+    useState<ReminderTime>({
+      hour: 20,
+      minute: 0,
+    });
+
   const [isLoading, setIsLoading] =
     useState<boolean>(true);
 
   const [isUpdating, setIsUpdating] =
     useState<boolean>(false);
 
-  /**
-   * Reloads the saved preference whenever the user opens
-   * the Settings tab.
-   */
+  const [showTimePicker, setShowTimePicker] =
+    useState<boolean>(false);
+
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
 
-      async function loadReminderPreference(): Promise<void> {
+      async function loadReminderSettings(): Promise<void> {
         try {
-          const enabled =
-            await getRemindersEnabled();
+          const [enabled, time] =
+            await Promise.all([
+              getRemindersEnabled(),
+              getReminderTime(),
+            ]);
 
           if (isActive) {
             setLocalRemindersEnabled(enabled);
+            setSelectedTime(time);
           }
         } catch (error) {
           console.error(
-            'Failed to load reminder preference:',
+            'Failed to load reminder settings:',
             error,
           );
         } finally {
@@ -66,7 +84,7 @@ export default function SettingsScreen(): React.JSX.Element {
         }
       }
 
-      loadReminderPreference();
+      loadReminderSettings();
 
       return () => {
         isActive = false;
@@ -83,10 +101,6 @@ export default function SettingsScreen(): React.JSX.Element {
 
     const previousValue = remindersEnabled;
 
-    /*
-     * Update the switch immediately to make the interface
-     * feel responsive.
-     */
     setLocalRemindersEnabled(enabled);
     setIsUpdating(true);
 
@@ -94,22 +108,11 @@ export default function SettingsScreen(): React.JSX.Element {
       await setRemindersEnabled(enabled);
 
       if (enabled) {
-        /*
-         * Reschedule the reminder if the user has not logged
-         * today's mood.
-         */
         await updateMoodReminder();
       } else {
-        /*
-         * Stop any reminder that is currently pending.
-         */
         await cancelMoodReminder();
       }
     } catch (error) {
-      /*
-       * Restore the previous switch value if saving or
-       * scheduling fails.
-       */
       setLocalRemindersEnabled(previousValue);
 
       console.error(
@@ -124,6 +127,75 @@ export default function SettingsScreen(): React.JSX.Element {
     } finally {
       setIsUpdating(false);
     }
+  }
+
+  function handleTimeChange(
+    event: DateTimePickerEvent,
+    date?: Date,
+  ): void {
+    if (Platform.OS === 'android') {
+      setShowTimePicker(false);
+    }
+
+    if (
+      event.type === 'dismissed' ||
+      date === undefined
+    ) {
+      return;
+    }
+
+    setSelectedTime({
+      hour: date.getHours(),
+      minute: date.getMinutes(),
+    });
+  }
+
+  async function handleSaveTime(): Promise<void> {
+    if (isUpdating) {
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      await setReminderTime(selectedTime);
+
+      if (remindersEnabled) {
+        await updateMoodReminder();
+      }
+
+      Alert.alert(
+        'Reminder time saved',
+        `Your reminder has been set for ${formatReminderTime(
+          selectedTime,
+        )}.`,
+      );
+    } catch (error) {
+      console.error(
+        'Failed to save reminder time:',
+        error,
+      );
+
+      Alert.alert(
+        'Unable to save reminder time',
+        'The selected reminder time could not be saved. Please try again.',
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  }
+
+  function getPickerDate(): Date {
+    const pickerDate = new Date();
+
+    pickerDate.setHours(
+      selectedTime.hour,
+      selectedTime.minute,
+      0,
+      0,
+    );
+
+    return pickerDate;
   }
 
   if (isLoading) {
@@ -183,18 +255,83 @@ export default function SettingsScreen(): React.JSX.Element {
           />
         </View>
 
+        <View style={styles.timeCard}>
+          <Text style={styles.settingTitle}>
+            Reminder time
+          </Text>
+
+          <Text style={styles.settingDescription}>
+            Choose when you would like to receive your
+            daily reminder.
+          </Text>
+
+          <Pressable
+            style={styles.timeButton}
+            onPress={() => setShowTimePicker(true)}
+            disabled={isUpdating}>
+            <Text style={styles.timeButtonText}>
+              {formatReminderTime(selectedTime)}
+            </Text>
+          </Pressable>
+
+          {showTimePicker && (
+            <DateTimePicker
+              value={getPickerDate()}
+              mode="time"
+              is24Hour={false}
+              display={
+                Platform.OS === 'ios'
+                  ? 'spinner'
+                  : 'default'
+              }
+              onChange={handleTimeChange}
+            />
+          )}
+
+          <Pressable
+            style={[
+              styles.saveButton,
+              isUpdating &&
+                styles.disabledButton,
+            ]}
+            onPress={handleSaveTime}
+            disabled={isUpdating}>
+            <Text style={styles.saveButtonText}>
+              Save reminder time
+            </Text>
+          </Pressable>
+        </View>
+
         {isUpdating && (
           <View style={styles.updatingContainer}>
             <ActivityIndicator size="small" />
 
             <Text style={styles.updatingText}>
-              Updating reminder setting...
+              Updating reminder settings...
             </Text>
           </View>
         )}
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function formatReminderTime(
+  time: ReminderTime,
+): string {
+  const date = new Date();
+
+  date.setHours(
+    time.hour,
+    time.minute,
+    0,
+    0,
+  );
+
+  return date.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 const styles = StyleSheet.create({
@@ -259,6 +396,47 @@ const styles = StyleSheet.create({
     color: '#888888',
     fontSize: 13,
     marginTop: 10,
+  },
+
+  timeCard: {
+    backgroundColor: '#f7f7f7',
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 18,
+  },
+
+  timeButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 18,
+  },
+
+  timeButtonText: {
+    color: '#111111',
+    fontSize: 24,
+    fontWeight: '700',
+  },
+
+  saveButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#111111',
+    borderRadius: 12,
+    paddingVertical: 14,
+    marginTop: 16,
+  },
+
+  disabledButton: {
+    opacity: 0.5,
+  },
+
+  saveButtonText: {
+    color: '#ffffff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 
   updatingContainer: {

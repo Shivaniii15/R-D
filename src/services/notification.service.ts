@@ -6,18 +6,15 @@ import notifee, {
 } from '@notifee/react-native';
 
 import { getTodaysMood } from '../storage/mood.storage';
-import { getRemindersEnabled } from '../storage/reminderPreferences.storage';
+
+import {
+  getReminderTime,
+  getRemindersEnabled,
+} from '../storage/reminderPreferences.storage';
 
 const MOOD_CHANNEL_ID = 'mood-reminders';
 const MOOD_REMINDER_ID = 'daily-mood-reminder';
 
-const REMINDER_HOUR = 20; // 8:00 PM
-const REMINDER_MINUTE = 0;
-
-/**
- * Requests notification permission and creates the Android
- * notification channel.
- */
 export async function setupNotifications(): Promise<boolean> {
   try {
     const settings = await notifee.requestPermission();
@@ -51,9 +48,6 @@ export async function setupNotifications(): Promise<boolean> {
   }
 }
 
-/**
- * Cancels the pending daily mood reminder.
- */
 export async function cancelMoodReminder(): Promise<void> {
   try {
     await notifee.cancelTriggerNotification(
@@ -71,44 +65,33 @@ export async function cancelMoodReminder(): Promise<void> {
   }
 }
 
-/**
- * Calculates the timestamp for the next 8:00 PM.
- */
-function getNextReminderTime(): number {
+async function getNextReminderTime(): Promise<number> {
   const now = new Date();
+  const savedTime = await getReminderTime();
 
   const reminderTime = new Date();
+
   reminderTime.setHours(
-    REMINDER_HOUR,
-    REMINDER_MINUTE,
+    savedTime.hour,
+    savedTime.minute,
     0,
     0,
   );
 
-  /*
-   * If 8:00 PM has already passed today, schedule the
-   * reminder for 8:00 PM tomorrow.
-   */
   if (reminderTime.getTime() <= now.getTime()) {
-    reminderTime.setDate(reminderTime.getDate() + 1);
+    reminderTime.setDate(
+      reminderTime.getDate() + 1,
+    );
   }
 
   return reminderTime.getTime();
 }
 
-/**
- * Checks the user's reminder preference and today's mood,
- * then either schedules or cancels the reminder.
- */
 export async function updateMoodReminder(): Promise<boolean> {
   try {
     const remindersEnabled =
       await getRemindersEnabled();
 
-    /*
-     * Cancel any pending notification when the user has
-     * disabled reminders.
-     */
     if (!remindersEnabled) {
       await cancelMoodReminder();
 
@@ -126,18 +109,10 @@ export async function updateMoodReminder(): Promise<boolean> {
       return false;
     }
 
-    /*
-     * Remove the existing trigger before creating another
-     * one so duplicate reminders cannot be scheduled.
-     */
     await cancelMoodReminder();
 
     const todaysMood = await getTodaysMood();
 
-    /*
-     * Do not schedule a reminder when today's mood has
-     * already been recorded.
-     */
     if (todaysMood !== null) {
       console.log(
         'Mood already logged. No reminder scheduled.',
@@ -146,9 +121,12 @@ export async function updateMoodReminder(): Promise<boolean> {
       return false;
     }
 
+    const reminderTimestamp =
+      await getNextReminderTime();
+
     const trigger: TimestampTrigger = {
       type: TriggerType.TIMESTAMP,
-      timestamp: getNextReminderTime(),
+      timestamp: reminderTimestamp,
     };
 
     await notifee.createTriggerNotification(
@@ -172,7 +150,9 @@ export async function updateMoodReminder(): Promise<boolean> {
     );
 
     console.log(
-      'Mood reminder scheduled for the next 8:00 PM.',
+      `Mood reminder scheduled for ${new Date(
+        reminderTimestamp,
+      ).toLocaleTimeString()}.`,
     );
 
     return true;
