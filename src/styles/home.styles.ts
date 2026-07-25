@@ -70,6 +70,20 @@ export const homeStyles = StyleSheet.create({
     color: '#aaa',
     fontSize: 13,
   },
+  historyButton: {
+    marginHorizontal: 20,
+    marginTop: 12,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#111',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  historyButtonText: {
+    color: '#111',
+    fontSize: 15,
+    fontWeight: '600',
+  },
   chartContainer: {
     marginTop: 8,
     borderRadius: 12,
@@ -81,18 +95,53 @@ export const homeStyles = StyleSheet.create({
     fontSize: 14,
     paddingVertical: 20,
   },
-  historyButton: {
-  marginHorizontal: 20,
-  marginTop: 12,
-  paddingVertical: 14,
-  borderWidth: 1,
-  borderColor: '#111',
-  borderRadius: 12,
-  alignItems: 'center',
-},
-historyButtonText: {
-  color: '#111',
-  fontSize: 15,
-  fontWeight: '600',
-},
+  // Range filters
+  rangeRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    gap: 8,
+  },
+  rangeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  rangeButtonSelected: {
+    backgroundColor: '#111',
+    borderColor: '#111',
+  },
+  rangeButtonText: {
+    fontSize: 13,
+    color: '#aaa',
+    fontWeight: '500',
+  },
+  rangeButtonTextSelected: {
+    color: '#fff',
+  },
+  // Stats
+  statRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#aaa',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111',
+  },
 });
