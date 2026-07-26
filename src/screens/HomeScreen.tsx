@@ -145,7 +145,12 @@ export default function HomeScreen(): React.JSX.Element {
           </TouchableOpacity>
         )}
 
-        
+        <TouchableOpacity
+          style={styles.historyButton}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('MoodHistory')}>
+          <Text style={styles.historyButtonText}>View Mood History</Text>
+        </TouchableOpacity>
 
         <View style={styles.section}>
           {/* Range Filters */}
@@ -202,13 +207,6 @@ export default function HomeScreen(): React.JSX.Element {
             <Text style={styles.noDataText}>No mood data for this period yet.</Text>
           )}
         </View>
-
-        <TouchableOpacity
-          style={styles.historyButton}
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('MoodHistory')}>
-          <Text style={styles.historyButtonText}>View Mood History</Text>
-        </TouchableOpacity>
 
         <View style={{ height: 32 }} />
       </ScrollView>

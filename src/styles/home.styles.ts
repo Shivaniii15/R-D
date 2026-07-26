@@ -12,6 +12,11 @@ export const homeStyles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   heading: {
     fontSize: 24,
     fontWeight: '700',
@@ -19,6 +24,39 @@ export const homeStyles = StyleSheet.create({
   },
   subheading: {
     fontSize: 14,
+    color: '#aaa',
+    marginTop: 4,
+  },
+  exitButton: {
+    padding: 8,
+  },
+  exitButtonText: {
+    fontSize: 18,
+    color: '#aaa',
+    fontWeight: '600',
+  },
+  emojiRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    marginTop: 8,
+  },
+  emojiButton: {
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  emojiButtonSelected: {
+    borderColor: '#111',
+    backgroundColor: '#f5f5f5',
+  },
+  emojiText: {
+    fontSize: 28,
+  },
+  emojiLabel: {
+    fontSize: 10,
     color: '#aaa',
     marginTop: 4,
   },
