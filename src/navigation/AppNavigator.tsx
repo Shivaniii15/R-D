@@ -17,6 +17,7 @@ import Feather from 'react-native-vector-icons/Feather';
 
 import HomeScreen from '../screens/HomeScreen';
 import JournalNavigator from './JournalNavigator';
+import TodayRemindersScreen from '../screens/TodayRemindersScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 import {
@@ -26,6 +27,7 @@ import {
 type TabName =
   | 'Home'
   | 'Journal'
+  | 'Reminders'
   | 'Settings';
 
 interface TabIconProps {
@@ -42,6 +44,7 @@ function TabIcon({
   const iconMap: Record<TabName, string> = {
     Home: 'home',
     Journal: 'book',
+    Reminders: 'check-circle',
     Settings: 'settings',
   };
 
@@ -100,6 +103,11 @@ export default function AppNavigator(): React.JSX.Element {
         <Tab.Screen
           name="Journal"
           component={JournalNavigator}
+        />
+
+        <Tab.Screen
+          name="Reminders"
+          component={TodayRemindersScreen}
         />
 
         <Tab.Screen
