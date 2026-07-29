@@ -1,32 +1,41 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
-import notifee, { EventType } from '@notifee/react-native';
+
+import notifee, {
+  EventType,
+} from '@notifee/react-native';
 
 import AppNavigator from './src/navigation/AppNavigator';
+
 import {
   setupNotifications,
   updateMoodReminder,
 } from './src/services/notification.service';
 
+import {
+  updateSleepReminder,
+} from './src/services/sleepNotification.service';
+
 export default function App(): React.JSX.Element {
   useEffect(() => {
     async function initialiseNotifications(): Promise<void> {
       try {
-        const notificationsReady = await setupNotifications();
+        const notificationsReady =
+          await setupNotifications();
 
         if (!notificationsReady) {
           return;
         }
 
-        /*
-         * This checks whether the application was opened by tapping
-         * a notification while the app was completely closed.
-         */
         const initialNotification =
           await notifee.getInitialNotification();
 
+        const notificationType =
+          initialNotification?.notification.data
+            ?.notificationType;
+
         if (
-          initialNotification?.notification.data?.notificationType ===
+          notificationType ===
           'mood-reminder'
         ) {
           console.log(
@@ -34,7 +43,19 @@ export default function App(): React.JSX.Element {
           );
         }
 
-        await updateMoodReminder();
+        if (
+          notificationType ===
+          'sleep-reminder'
+        ) {
+          console.log(
+            'Application opened from a sleep reminder.',
+          );
+        }
+
+        await Promise.all([
+          updateMoodReminder(),
+          updateSleepReminder(),
+        ]);
       } catch (error) {
         console.error(
           'Failed to initialise notifications:',
@@ -45,23 +66,36 @@ export default function App(): React.JSX.Element {
 
     initialiseNotifications();
 
-    /*
-     * This handles a notification being tapped while the application
-     * is already open or running in the background.
-     */
-    const unsubscribe = notifee.onForegroundEvent(
-      ({ type, detail }) => {
-        if (
-          type === EventType.PRESS &&
-          detail.notification?.data?.notificationType ===
+    const unsubscribe =
+      notifee.onForegroundEvent(
+        ({ type, detail }) => {
+          if (type !== EventType.PRESS) {
+            return;
+          }
+
+          const notificationType =
+            detail.notification?.data
+              ?.notificationType;
+
+          if (
+            notificationType ===
             'mood-reminder'
-        ) {
-          console.log(
-            'Mood reminder notification was pressed.',
-          );
-        }
-      },
-    );
+          ) {
+            console.log(
+              'Mood reminder notification was pressed.',
+            );
+          }
+
+          if (
+            notificationType ===
+            'sleep-reminder'
+          ) {
+            console.log(
+              'Sleep reminder notification was pressed.',
+            );
+          }
+        },
+      );
 
     return unsubscribe;
   }, []);
