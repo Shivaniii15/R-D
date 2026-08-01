@@ -1,5 +1,10 @@
-import React, { useEffect } from 'react';
-import { StatusBar } from 'react-native';
+import React, {
+  useEffect,
+} from 'react';
+import {
+  AppState,
+  StatusBar,
+} from 'react-native';
 
 import notifee, {
   EventType,
@@ -16,9 +21,18 @@ import {
   updateSleepReminder,
 } from './src/services/sleepNotification.service';
 
+import {
+  updateActivityReminder,
+} from './src/services/activityNotification.service';
+
+import {
+  requestActivitySuggestionNavigation,
+  restorePendingActivityNavigation,
+} from './src/navigation/navigation.service';
+
 export default function App(): React.JSX.Element {
   useEffect(() => {
-    async function initialiseNotifications(): Promise<void> {
+    async function initialiseApp(): Promise<void> {
       try {
         const notificationsReady =
           await setupNotifications();
@@ -27,77 +41,96 @@ export default function App(): React.JSX.Element {
           return;
         }
 
+        /*
+         * Handles a notification that launched the app
+         * from a completely closed state.
+         */
         const initialNotification =
           await notifee.getInitialNotification();
 
-        const notificationType =
+        const initialNotificationType =
           initialNotification?.notification.data
             ?.notificationType;
 
         if (
-          notificationType ===
-          'mood-reminder'
+          initialNotificationType ===
+          'physical-activity-reminder'
         ) {
-          console.log(
-            'Mood logging screen opened from a notification.',
-          );
+          await requestActivitySuggestionNavigation();
         }
 
-        if (
-          notificationType ===
-          'sleep-reminder'
-        ) {
-          console.log(
-            'Application opened from a sleep reminder.',
-          );
-        }
+        /*
+         * Restores a press recorded by the background
+         * event handler.
+         */
+        await restorePendingActivityNavigation();
 
         await Promise.all([
           updateMoodReminder(),
           updateSleepReminder(),
+          updateActivityReminder(),
         ]);
       } catch (error) {
-        console.error(
-          'Failed to initialise notifications:',
+        console.log(
+          'Failed to initialise the app:',
           error,
         );
       }
     }
 
-    initialiseNotifications();
+    initialiseApp();
 
-    const unsubscribe =
+    /*
+     * Handles notification presses while React is
+     * already running in the foreground.
+     */
+    const unsubscribeNotification =
       notifee.onForegroundEvent(
         ({ type, detail }) => {
-          if (type !== EventType.PRESS) {
-            return;
-          }
-
           const notificationType =
             detail.notification?.data
               ?.notificationType;
 
           if (
+            type === EventType.PRESS &&
             notificationType ===
-            'mood-reminder'
+              'physical-activity-reminder'
           ) {
-            console.log(
-              'Mood reminder notification was pressed.',
-            );
-          }
-
-          if (
-            notificationType ===
-            'sleep-reminder'
-          ) {
-            console.log(
-              'Sleep reminder notification was pressed.',
-            );
+            requestActivitySuggestionNavigation()
+              .catch(error => {
+                console.log(
+                  'Failed to open activity suggestion:',
+                  error,
+                );
+              });
           }
         },
       );
 
-    return unsubscribe;
+    /*
+     * When the app returns from the background, restore
+     * any pending navigation request.
+     */
+    const appStateSubscription =
+      AppState.addEventListener(
+        'change',
+        nextState => {
+          if (nextState === 'active') {
+            restorePendingActivityNavigation()
+              .catch(error => {
+                console.log(
+                  'Failed to restore activity navigation:',
+                  error,
+                );
+              });
+          }
+        },
+      );
+
+    return () => {
+      unsubscribeNotification();
+      appStateSubscription.remove();
+    };
   }, []);
 
   return (

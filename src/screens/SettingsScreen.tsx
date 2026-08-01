@@ -51,6 +51,8 @@ import {
   updateSleepReminder,
 } from '../services/sleepNotification.service';
 
+import ActivityReminderSettings from '../components/ActivityReminderSettings';
+
 export default function SettingsScreen(): React.JSX.Element {
   const [
     remindersEnabled,
@@ -234,7 +236,6 @@ export default function SettingsScreen(): React.JSX.Element {
 
       if (!enabled) {
         await cancelSleepReminder();
-
         return;
       }
 
@@ -757,6 +758,8 @@ export default function SettingsScreen(): React.JSX.Element {
             </Text>
           </Pressable>
         </View>
+
+        <ActivityReminderSettings />
 
         {(isUpdatingMood ||
           isUpdatingSleep) && (
