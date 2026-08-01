@@ -1,8 +1,11 @@
 import React, {
   useEffect,
+  useRef,
 } from 'react';
+
 import {
   AppState,
+  AppStateStatus,
   StatusBar,
 } from 'react-native';
 
@@ -26,12 +29,40 @@ import {
 } from './src/services/activityNotification.service';
 
 import {
+  updateMotivationalReminder,
+} from './src/services/motivationalNotification.service';
+
+import {
+  updateLastActiveTime,
+} from './src/storage/motivationalReminder.storage';
+
+import {
   requestActivitySuggestionNavigation,
   restorePendingActivityNavigation,
 } from './src/navigation/navigation.service';
 
 export default function App(): React.JSX.Element {
+  const currentAppState = useRef<AppStateStatus>(
+    AppState.currentState,
+  );
+
   useEffect(() => {
+    /**
+     * Records that the user is currently using the app,
+     * then restarts the motivational inactivity countdown.
+     */
+    async function recordAppActivity(): Promise<void> {
+      try {
+        await updateLastActiveTime();
+        await updateMotivationalReminder();
+      } catch (error) {
+        console.log(
+          'Failed to update app activity:',
+          error,
+        );
+      }
+    }
+
     async function initialiseApp(): Promise<void> {
       try {
         const notificationsReady =
@@ -42,7 +73,7 @@ export default function App(): React.JSX.Element {
         }
 
         /*
-         * Handles a notification that launched the app
+         * Detects whether a notification opened the app
          * from a completely closed state.
          */
         const initialNotification =
@@ -52,6 +83,10 @@ export default function App(): React.JSX.Element {
           initialNotification?.notification.data
             ?.notificationType;
 
+        /*
+         * Open the movement suggestion page when an
+         * activity notification launched the app.
+         */
         if (
           initialNotificationType ===
           'physical-activity-reminder'
@@ -60,15 +95,26 @@ export default function App(): React.JSX.Element {
         }
 
         /*
-         * Restores a press recorded by the background
-         * event handler.
+         * Restore a navigation request saved by the
+         * background notification handler.
          */
         await restorePendingActivityNavigation();
 
+        /*
+         * Opening the app counts as activity. This resets
+         * the motivational notification countdown.
+         */
+        await updateLastActiveTime();
+
+        /*
+         * Refresh every notification schedule according
+         * to the user's saved preferences.
+         */
         await Promise.all([
           updateMoodReminder(),
           updateSleepReminder(),
           updateActivityReminder(),
+          updateMotivationalReminder(),
         ]);
       } catch (error) {
         console.log(
@@ -81,20 +127,23 @@ export default function App(): React.JSX.Element {
     initialiseApp();
 
     /*
-     * Handles notification presses while React is
-     * already running in the foreground.
+     * Handles notification presses while the React
+     * application is already running.
      */
     const unsubscribeNotification =
       notifee.onForegroundEvent(
         ({ type, detail }) => {
+          if (type !== EventType.PRESS) {
+            return;
+          }
+
           const notificationType =
             detail.notification?.data
               ?.notificationType;
 
           if (
-            type === EventType.PRESS &&
             notificationType ===
-              'physical-activity-reminder'
+            'physical-activity-reminder'
           ) {
             requestActivitySuggestionNavigation()
               .catch(error => {
@@ -104,22 +153,51 @@ export default function App(): React.JSX.Element {
                 );
               });
           }
+
+          /*
+           * Pressing any notification and returning to
+           * the app counts as app activity.
+           */
+          recordAppActivity()
+            .catch(error => {
+              console.log(
+                'Failed to record notification activity:',
+                error,
+              );
+            });
         },
       );
 
     /*
-     * When the app returns from the background, restore
-     * any pending navigation request.
+     * When the user returns to the app after leaving it,
+     * reset the inactivity countdown.
      */
     const appStateSubscription =
       AppState.addEventListener(
         'change',
         nextState => {
-          if (nextState === 'active') {
+          const previousState =
+            currentAppState.current;
+
+          currentAppState.current =
+            nextState;
+
+          if (
+            nextState === 'active' &&
+            previousState !== 'active'
+          ) {
             restorePendingActivityNavigation()
               .catch(error => {
                 console.log(
                   'Failed to restore activity navigation:',
+                  error,
+                );
+              });
+
+            recordAppActivity()
+              .catch(error => {
+                console.log(
+                  'Failed to record app activity:',
                   error,
                 );
               });

@@ -52,6 +52,7 @@ import {
 } from '../services/sleepNotification.service';
 
 import ActivityReminderSettings from '../components/ActivityReminderSettings';
+import MotivationalReminderSettings from '../components/MotivationalReminderSettings';
 
 export default function SettingsScreen(): React.JSX.Element {
   const [
@@ -195,9 +196,16 @@ export default function SettingsScreen(): React.JSX.Element {
         previousValue,
       );
 
-      await setRemindersEnabled(
-        previousValue,
-      );
+      try {
+        await setRemindersEnabled(
+          previousValue,
+        );
+      } catch (restoreError) {
+        console.log(
+          'Failed to restore self-care reminder setting:',
+          restoreError,
+        );
+      }
 
       console.log(
         'Failed to update self-care reminders:',
@@ -280,9 +288,16 @@ export default function SettingsScreen(): React.JSX.Element {
         previousValue,
       );
 
-      await setSleepRemindersEnabled(
-        previousValue,
-      );
+      try {
+        await setSleepRemindersEnabled(
+          previousValue,
+        );
+      } catch (restoreError) {
+        console.log(
+          'Failed to restore sleep reminder setting:',
+          restoreError,
+        );
+      }
 
       console.log(
         'Failed to update sleep reminders:',
@@ -760,6 +775,8 @@ export default function SettingsScreen(): React.JSX.Element {
         </View>
 
         <ActivityReminderSettings />
+
+        <MotivationalReminderSettings />
 
         {(isUpdatingMood ||
           isUpdatingSleep) && (
