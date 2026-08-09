@@ -8,11 +8,11 @@ import DisclaimerNotice from '../components/DisclaimerNotice';
 
 import HomeScreen from './HomeNavigator';
 import JournalNavigator from './JournalNavigator';
-import Tab3Screen from '../screens/Tab3Screen';
+import ResourcesScreen from '../screens/ResourcesScreen';
 import { navigationStyles } from '../styles/Navigation.styles';
 import HomeNavigator from './HomeNavigator';
 
-type TabName = 'Home' | 'Journal' | 'Tab3';
+type TabName = 'Home' | 'Journal' | 'Resources';
 
 interface TabIconProps {
   name: TabName;
@@ -24,7 +24,7 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
   const iconMap: Record<TabName, string> = {
     Home: 'home',
     Journal: 'book',
-    Tab3: 'box',
+    Resources: 'grid',
   };
   return <Feather name={iconMap[name]} size={22} color={color} />;
 }
@@ -33,28 +33,25 @@ const Tab = createBottomTabNavigator();
 
 export default function AppNavigator(): React.JSX.Element {
   return (
-    <>
-      <DisclaimerNotice /> 
-        <NavigationContainer>
-          <Tab.Navigator
-            screenOptions={({ route }): BottomTabNavigationOptions => ({
-              headerShown: false,
-              tabBarIcon: ({ focused }) => (
-                <TabIcon name={route.name as TabName} focused={focused} />
-              ),
-              tabBarLabel: ({ focused }) => (
-                <Text style={[navigationStyles.tabLabel, { color: focused ? '#111' : '#bbb' }]}>
-                  {route.name}
-                </Text>
-              ),
-              tabBarStyle: navigationStyles.tabBar,
-              tabBarItemStyle: navigationStyles.tabBarItem,
-            })}>
-            <Tab.Screen name="Home" component={HomeNavigator} />
-            <Tab.Screen name="Journal" component={JournalNavigator} />
-            <Tab.Screen name="Tab3" component={Tab3Screen} />
-          </Tab.Navigator>
-        </NavigationContainer>
-      </>
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }): BottomTabNavigationOptions => ({
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name={route.name as TabName} focused={focused} />
+          ),
+          tabBarLabel: ({ focused }) => (
+            <Text style={[navigationStyles.tabLabel, { color: focused ? '#111' : '#bbb' }]}>
+              {route.name}
+            </Text>
+          ),
+          tabBarStyle: navigationStyles.tabBar,
+          tabBarItemStyle: navigationStyles.tabBarItem,
+        })}>
+        <Tab.Screen name="Home" component={HomeNavigator} />
+        <Tab.Screen name="Journal" component={JournalNavigator} />
+        <Tab.Screen name="Resources" component={ResourcesScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
