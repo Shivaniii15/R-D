@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
+import DisclaimerNotice from '../components/DisclaimerNotice';
 
 import HomeScreen from './HomeNavigator';
 import JournalNavigator from './JournalNavigator';
