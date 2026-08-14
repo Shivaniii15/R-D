@@ -10,57 +10,112 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
 import { LineChart } from 'react-native-chart-kit';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   getTodaysMood,
   saveMoodEntry,
-  getWeekMoods,
+  getMoodsByDays,
+  getWeeklyAverages,
+  WeeklyAverage,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
+import { HomeStackParamList } from '../navigation/HomeNavigator';
 import { homeStyles as styles } from '../styles/home.styles';
 
 const screenWidth = Dimensions.get('window').width;
 
 const EMOJIS = [
-  { emoji: '😢', value: 2, label: 'Terrible' },
-  { emoji: '😕', value: 4, label: 'Bad' },
-  { emoji: '😐', value: 6, label: 'Okay' },
-  { emoji: '🙂', value: 8, label: 'Good' },
-  { emoji: '😄', value: 10, label: 'Great' },
+  { emoji: '😢', value: 1, label: 'Terrible' },
+  { emoji: '😕', value: 2, label: 'Bad' },
+  { emoji: '😐', value: 3, label: 'Okay' },
+  { emoji: '🙂', value: 4, label: 'Good' },
+  { emoji: '😄', value: 5, label: 'Great' },
 ];
 
+type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'HomeMain'>;
+
+type RangeOption = 'Week' | 'Month' | '3 Months';
+
+function calcAverage(entries: MoodEntry[]): string {
+  const logged = entries.filter(e => e.mood > 0);
+  if (logged.length === 0) return 'N/A';
+  return (logged.reduce((sum, e) => sum + e.mood, 0) / logged.length).toFixed(1);
+}
+
+function calcAverageFromWeekly(entries: WeeklyAverage[]): string {
+  const logged = entries.filter(e => e.average > 0);
+  if (logged.length === 0) return 'N/A';
+  return (logged.reduce((sum, e) => sum + e.average, 0) / logged.length).toFixed(1);
+}
+
 export default function HomeScreen(): React.JSX.Element {
-  const [mood, setMood] = useState(5);
+  const [mood, setMood] = useState(3);
   const [todaysMood, setTodaysMood] = useState<number | null>(null);
-  const [weekMoods, setWeekMoods] = useState<MoodEntry[]>([]);
+  const [selectedRange, setSelectedRange] = useState<RangeOption>('Week');
+  const [weekEntries, setWeekEntries] = useState<MoodEntry[]>([]);
+  const [weeklyAverages, setWeeklyAverages] = useState<WeeklyAverage[]>([]);
+
+  const navigation = useNavigation<HomeNavigationProp>();
 
   useFocusEffect(
     useCallback(() => {
       getTodaysMood().then(setTodaysMood);
-      getWeekMoods().then(setWeekMoods);
+      getMoodsByDays(7).then(setWeekEntries);
     }, []),
   );
 
-  async function handleSave() {
+  async function handleRangeChange(range: RangeOption) {
+    setSelectedRange(range);
+    if (range === 'Week') {
+      getMoodsByDays(7).then(setWeekEntries);
+    } else if (range === 'Month') {
+      getWeeklyAverages(4).then(setWeeklyAverages);
+    } else {
+      getWeeklyAverages(12).then(setWeeklyAverages);
+    }
+  }
+
+  async function handleSave(): Promise<void> {
     const today = new Date().toISOString().split('T')[0];
     await saveMoodEntry({ date: today, mood });
     setTodaysMood(mood);
-    getWeekMoods().then(setWeekMoods);
+    if (selectedRange === 'Week') {
+      getMoodsByDays(7).then(setWeekEntries);
+    } else if (selectedRange === 'Month') {
+      getWeeklyAverages(4).then(setWeeklyAverages);
+    } else {
+      getWeeklyAverages(12).then(setWeeklyAverages);
+    }
   }
 
   const alreadyLogged = todaysMood !== null;
+  const isWeek = selectedRange === 'Week';
 
-  const chartLabels = weekMoods.map(e => {
-    const date = new Date(e.date + 'T00:00:00');
-    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
-  });
+  const chartLabels = isWeek
+    ? weekEntries.map(e => {
+        const date = new Date(`${e.date}T00:00:00`);
+        return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+      })
+    : weeklyAverages.map(e => e.label);
 
-  const chartData = weekMoods.map(e => e.mood);
-  const hasAnyData = chartData.some(v => v > 0);
+  const chartData = isWeek
+    ? weekEntries.map(e => (e.mood === 0 ? 0.1 : e.mood))
+    : weeklyAverages.map(e => (e.average === 0 ? 0.1 : e.average));
+
+  const hasAnyData = isWeek
+    ? weekEntries.some(e => e.mood > 0)
+    : weeklyAverages.some(e => e.average > 0);
+
+  const average = isWeek ? calcAverage(weekEntries) : calcAverageFromWeekly(weeklyAverages);
+  const countLogged = isWeek
+    ? weekEntries.filter(e => e.mood > 0).length
+    : weeklyAverages.filter(e => e.average > 0).length;
+  const countLabel = isWeek ? 'Days Logged' : 'Weeks Logged';
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
@@ -75,11 +130,10 @@ export default function HomeScreen(): React.JSX.Element {
           </View>
         </View>
 
-        {/* Mood Slider */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Today's Mood</Text>
           <Text style={styles.moodValue}>
-            {alreadyLogged ? todaysMood : mood}/10
+            {alreadyLogged ? todaysMood : mood}/5
           </Text>
 
           {!alreadyLogged && (
@@ -103,7 +157,7 @@ export default function HomeScreen(): React.JSX.Element {
               {/* Slider */}
               <Slider
                 minimumValue={1}
-                maximumValue={10}
+                maximumValue={5}
                 step={1}
                 value={mood}
                 onValueChange={setMood}
@@ -113,31 +167,59 @@ export default function HomeScreen(): React.JSX.Element {
               />
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>1</Text>
-                <Text style={styles.sliderLabel}>10</Text>
+                <Text style={styles.sliderLabel}>5</Text>
               </View>
             </>
           )}
         </View>
 
-        {/* Save Button */}
         {alreadyLogged ? (
           <Text style={styles.savedText}>✓ Mood logged for today</Text>
         ) : (
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <TouchableOpacity style={styles.saveButton} activeOpacity={0.8} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Log Mood</Text>
           </TouchableOpacity>
         )}
 
-        {/* Weekly Chart */}
+        <TouchableOpacity
+          style={styles.historyButton}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('MoodHistory')}>
+          <Text style={styles.historyButtonText}>View Mood History</Text>
+        </TouchableOpacity>
+
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>This Week</Text>
+          {/* Range Filters */}
+          <View style={styles.rangeRow}>
+            {(['Week', 'Month', '3 Months'] as RangeOption[]).map(r => (
+              <TouchableOpacity
+                key={r}
+                style={[styles.rangeButton, selectedRange === r && styles.rangeButtonSelected]}
+                onPress={() => handleRangeChange(r)}>
+                <Text style={[styles.rangeButtonText, selectedRange === r && styles.rangeButtonTextSelected]}>
+                  {r}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Stats */}
+          <View style={styles.statRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>Average Mood</Text>
+              <Text style={styles.statValue}>{average}</Text>
+            </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statLabel}>{countLabel}</Text>
+              <Text style={styles.statValue}>{countLogged}</Text>
+            </View>
+          </View>
+
+          {/* Chart */}
           {hasAnyData ? (
             <View style={styles.chartContainer}>
               <LineChart
-                data={{
-                  labels: chartLabels,
-                  datasets: [{ data: chartData.map(v => (v === 0 ? 1 : v)) }],
-                }}
+                data={{ labels: chartLabels, datasets: [{ data: chartData }] }}
                 width={screenWidth - 40}
                 height={200}
                 yAxisSuffix=""
@@ -147,28 +229,22 @@ export default function HomeScreen(): React.JSX.Element {
                   backgroundColor: '#fff',
                   backgroundGradientFrom: '#fff',
                   backgroundGradientTo: '#fff',
-                  decimalPlaces: 0,
+                  decimalPlaces: 1,
                   color: () => '#111',
                   labelColor: () => '#aaa',
-                  propsForDots: {
-                    r: '5',
-                    strokeWidth: '2',
-                    stroke: '#111',
-                  },
-                  propsForBackgroundLines: {
-                    stroke: '#f0f0f0',
-                  },
+                  propsForDots: { r: '5', strokeWidth: '2', stroke: '#111' },
+                  propsForBackgroundLines: { stroke: '#f0f0f0' },
                 }}
                 bezier
                 style={{ borderRadius: 12 }}
               />
             </View>
           ) : (
-            <Text style={styles.noDataText}>
-              No mood data this week yet. Start logging!
-            </Text>
+            <Text style={styles.noDataText}>No mood data for this period yet.</Text>
           )}
         </View>
+
+        <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
   );
