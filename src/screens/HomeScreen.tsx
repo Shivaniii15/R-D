@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
@@ -24,6 +25,14 @@ import { homeStyles as styles } from '../styles/home.styles';
 
 const screenWidth = Dimensions.get('window').width;
 
+const EMOJIS = [
+  { emoji: '😢', value: 1, label: 'Terrible' },
+  { emoji: '😕', value: 2, label: 'Bad' },
+  { emoji: '😐', value: 3, label: 'Okay' },
+  { emoji: '🙂', value: 4, label: 'Good' },
+  { emoji: '😄', value: 5, label: 'Great' },
+];
+
 type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'HomeMain'>;
 
 type RangeOption = 'Week' | 'Month' | '3 Months';
@@ -41,7 +50,7 @@ function calcAverageFromWeekly(entries: WeeklyAverage[]): string {
 }
 
 export default function HomeScreen(): React.JSX.Element {
-  const [mood, setMood] = useState(5);
+  const [mood, setMood] = useState(3);
   const [todaysMood, setTodaysMood] = useState<number | null>(null);
   const [selectedRange, setSelectedRange] = useState<RangeOption>('Week');
   const [weekEntries, setWeekEntries] = useState<MoodEntry[]>([]);
@@ -108,20 +117,47 @@ export default function HomeScreen(): React.JSX.Element {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Text style={styles.heading}>Mood logging.</Text>
-          <Text style={styles.subheading}>How are you feeling today?</Text>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.heading}>Mood logging.</Text>
+              <Text style={styles.subheading}>How are you feeling today?</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.exitButton}
+              onPress={() => BackHandler.exitApp()}>
+              <Text style={styles.exitButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Today's Mood</Text>
           <Text style={styles.moodValue}>
-            {alreadyLogged ? todaysMood : mood}/10
+            {alreadyLogged ? todaysMood : mood}/5
           </Text>
+
           {!alreadyLogged && (
             <>
+              {/* Emoji Quick Select */}
+              <View style={styles.emojiRow}>
+                {EMOJIS.map(item => (
+                  <TouchableOpacity
+                    key={item.value}
+                    style={[
+                      styles.emojiButton,
+                      mood === item.value && styles.emojiButtonSelected,
+                    ]}
+                    onPress={() => setMood(item.value)}>
+                    <Text style={styles.emojiText}>{item.emoji}</Text>
+                    <Text style={styles.emojiLabel}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Slider */}
               <Slider
                 minimumValue={1}
-                maximumValue={10}
+                maximumValue={5}
                 step={1}
                 value={mood}
                 onValueChange={setMood}
@@ -131,7 +167,7 @@ export default function HomeScreen(): React.JSX.Element {
               />
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>1</Text>
-                <Text style={styles.sliderLabel}>10</Text>
+                <Text style={styles.sliderLabel}>5</Text>
               </View>
             </>
           )}
@@ -187,7 +223,7 @@ export default function HomeScreen(): React.JSX.Element {
                 width={screenWidth - 40}
                 height={200}
                 yAxisSuffix=""
-                yAxisInterval={2}
+                yAxisInterval={1}
                 fromZero
                 chartConfig={{
                   backgroundColor: '#fff',
