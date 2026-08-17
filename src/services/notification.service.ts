@@ -7,103 +7,161 @@ import notifee, {
 
 import { getTodaysMood } from '../storage/mood.storage';
 
+import {
+  getReminderTime,
+  getRemindersEnabled,
+} from '../storage/reminderPreferences.storage';
+
 const MOOD_CHANNEL_ID = 'mood-reminders';
 const MOOD_REMINDER_ID = 'daily-mood-reminder';
-const REMINDER_HOUR = 20; // 8:00 PM
-const REMINDER_MINUTE = 0;
 
 export async function setupNotifications(): Promise<boolean> {
-  const settings = await notifee.requestPermission();
+  try {
+    const settings = await notifee.requestPermission();
 
-  const permissionGranted =
-    settings.authorizationStatus === AuthorizationStatus.AUTHORIZED ||
-    settings.authorizationStatus === AuthorizationStatus.PROVISIONAL;
+    const permissionGranted =
+      settings.authorizationStatus ===
+        AuthorizationStatus.AUTHORIZED ||
+      settings.authorizationStatus ===
+        AuthorizationStatus.PROVISIONAL;
 
-  if (!permissionGranted) {
-    console.log('Notification permission was not granted.');
+    if (!permissionGranted) {
+      console.log('Notification permission was not granted.');
+      return false;
+    }
+
+    await notifee.createChannel({
+      id: MOOD_CHANNEL_ID,
+      name: 'Mood Reminders',
+      description: 'Daily reminders to log your mood.',
+      importance: AndroidImportance.HIGH,
+    });
+
+    return true;
+  } catch (error) {
+    console.error(
+      'Failed to set up notifications:',
+      error,
+    );
+
     return false;
   }
-
-  await notifee.createChannel({
-    id: MOOD_CHANNEL_ID,
-    name: 'Mood Reminders',
-    description: 'Daily reminders to log your mood.',
-    importance: AndroidImportance.HIGH,
-  });
-
-  return true;
 }
 
 export async function cancelMoodReminder(): Promise<void> {
-  await notifee.cancelTriggerNotification(MOOD_REMINDER_ID);
+  try {
+    await notifee.cancelTriggerNotification(
+      MOOD_REMINDER_ID,
+    );
+
+    console.log('Pending mood reminder cancelled.');
+  } catch (error) {
+    console.error(
+      'Failed to cancel mood reminder:',
+      error,
+    );
+
+    throw error;
+  }
 }
 
-function getNextReminderTime(): number {
+async function getNextReminderTime(): Promise<number> {
   const now = new Date();
+  const savedTime = await getReminderTime();
 
   const reminderTime = new Date();
-  reminderTime.setHours(REMINDER_HOUR, REMINDER_MINUTE, 0, 0);
 
-  /*
-   * When 8:00 PM has already passed, schedule the next reminder
-   * for 8:00 PM tomorrow.
-   */
+  reminderTime.setHours(
+    savedTime.hour,
+    savedTime.minute,
+    0,
+    0,
+  );
+
   if (reminderTime.getTime() <= now.getTime()) {
-    reminderTime.setDate(reminderTime.getDate() + 1);
+    reminderTime.setDate(
+      reminderTime.getDate() + 1,
+    );
   }
 
   return reminderTime.getTime();
 }
 
 export async function updateMoodReminder(): Promise<boolean> {
-  const notificationsReady = await setupNotifications();
+  try {
+    const remindersEnabled =
+      await getRemindersEnabled();
 
-  if (!notificationsReady) {
-    return false;
-  }
+    if (!remindersEnabled) {
+      await cancelMoodReminder();
 
-  /*
-   * Remove the existing trigger first so that duplicate reminders
-   * cannot be scheduled.
-   */
-  await cancelMoodReminder();
+      console.log(
+        'Self-care reminders are disabled. No reminder scheduled.',
+      );
 
-  const todaysMood = await getTodaysMood();
+      return false;
+    }
 
-  /*
-   * Do not schedule a reminder when today's mood has already
-   * been recorded.
-   */
-  if (todaysMood !== null) {
-    console.log('Mood already logged. No reminder scheduled.');
-    return false;
-  }
+    const notificationsReady =
+      await setupNotifications();
 
-  const trigger: TimestampTrigger = {
-    type: TriggerType.TIMESTAMP,
-    timestamp: getNextReminderTime(),
-  };
+    if (!notificationsReady) {
+      return false;
+    }
 
-  await notifee.createTriggerNotification(
-    {
-      id: MOOD_REMINDER_ID,
-      title: 'You have not logged your mood today',
-      body: 'Take a moment to record how you are feeling.',
-      data: {
-        screen: 'Home',
-        notificationType: 'mood-reminder',
-      },
-      android: {
-        channelId: MOOD_CHANNEL_ID,
-        smallIcon: 'ic_launcher',
-        pressAction: {
-          id: 'default',
+    await cancelMoodReminder();
+
+    const todaysMood = await getTodaysMood();
+
+    if (todaysMood !== null) {
+      console.log(
+        'Mood already logged. No reminder scheduled.',
+      );
+
+      return false;
+    }
+
+    const reminderTimestamp =
+      await getNextReminderTime();
+
+    const trigger: TimestampTrigger = {
+      type: TriggerType.TIMESTAMP,
+      timestamp: reminderTimestamp,
+    };
+
+    await notifee.createTriggerNotification(
+      {
+        id: MOOD_REMINDER_ID,
+        title: 'You have not logged your mood today',
+        body: 'Take a moment to record how you are feeling.',
+        data: {
+          screen: 'Home',
+          notificationType: 'mood-reminder',
+        },
+        android: {
+          channelId: MOOD_CHANNEL_ID,
+          smallIcon: 'ic_launcher',
+          pressAction: {
+            id: 'default',
+          },
         },
       },
-    },
-    trigger,
-  );
+      trigger,
+    );
 
-  console.log('Mood reminder scheduled for the next 8:00 PM.');
-  return true;
+    console.log(
+      `Mood reminder scheduled for ${new Date(
+        reminderTimestamp,
+      ).toLocaleTimeString()}.`,
+    );
+
+    return true;
+  } catch (error) {
+    console.error(
+      'Failed to update mood reminder:',
+      error,
+    );
+
+    return false;
+  }
 }
