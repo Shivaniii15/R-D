@@ -20,6 +20,10 @@ import {
   WeeklyAverage,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
+import {
+  cancelMoodReminder,
+  updateMoodReminder,
+} from '../services/notification.service';
 import { HomeStackParamList } from '../navigation/HomeNavigator';
 import { homeStyles as styles } from '../styles/home.styles';
 
@@ -60,32 +64,84 @@ export default function HomeScreen(): React.JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      getTodaysMood().then(setTodaysMood);
-      getMoodsByDays(7).then(setWeekEntries);
-    }, []),
+      async function loadMoodData(): Promise<void> {
+        try {
+          const savedTodaysMood = await getTodaysMood();
+          setTodaysMood(savedTodaysMood);
+
+          if (selectedRange === 'Week') {
+            const savedWeekEntries = await getMoodsByDays(7);
+            setWeekEntries(savedWeekEntries);
+          } else if (selectedRange === 'Month') {
+            const savedWeeklyAverages = await getWeeklyAverages(4);
+            setWeeklyAverages(savedWeeklyAverages);
+          } else {
+            const savedWeeklyAverages = await getWeeklyAverages(12);
+            setWeeklyAverages(savedWeeklyAverages);
+          }
+
+          /*
+           * Recheck the reminder whenever the Home screen becomes
+           * active.
+           */
+          await updateMoodReminder();
+        } catch (error) {
+          console.error('Failed to load mood data:', error);
+        }
+      }
+
+      loadMoodData();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedRange]),
   );
 
-  async function handleRangeChange(range: RangeOption) {
+  async function handleRangeChange(range: RangeOption): Promise<void> {
     setSelectedRange(range);
-    if (range === 'Week') {
-      getMoodsByDays(7).then(setWeekEntries);
-    } else if (range === 'Month') {
-      getWeeklyAverages(4).then(setWeeklyAverages);
-    } else {
-      getWeeklyAverages(12).then(setWeeklyAverages);
+    try {
+      if (range === 'Week') {
+        const savedWeekEntries = await getMoodsByDays(7);
+        setWeekEntries(savedWeekEntries);
+      } else if (range === 'Month') {
+        const savedWeeklyAverages = await getWeeklyAverages(4);
+        setWeeklyAverages(savedWeeklyAverages);
+      } else {
+        const savedWeeklyAverages = await getWeeklyAverages(12);
+        setWeeklyAverages(savedWeeklyAverages);
+      }
+    } catch (error) {
+      console.error('Failed to load range data:', error);
     }
   }
 
   async function handleSave(): Promise<void> {
-    const today = new Date().toISOString().split('T')[0];
-    await saveMoodEntry({ date: today, mood });
-    setTodaysMood(mood);
-    if (selectedRange === 'Week') {
-      getMoodsByDays(7).then(setWeekEntries);
-    } else if (selectedRange === 'Month') {
-      getWeeklyAverages(4).then(setWeeklyAverages);
-    } else {
-      getWeeklyAverages(12).then(setWeeklyAverages);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+
+      await saveMoodEntry({
+        date: today,
+        mood,
+      });
+
+      setTodaysMood(mood);
+
+      /*
+       * The user has now logged today's mood, so any pending
+       * reminder should be cancelled.
+       */
+      await cancelMoodReminder();
+
+      if (selectedRange === 'Week') {
+        const updatedWeekEntries = await getMoodsByDays(7);
+        setWeekEntries(updatedWeekEntries);
+      } else if (selectedRange === 'Month') {
+        const updatedWeeklyAverages = await getWeeklyAverages(4);
+        setWeeklyAverages(updatedWeeklyAverages);
+      } else {
+        const updatedWeeklyAverages = await getWeeklyAverages(12);
+        setWeeklyAverages(updatedWeeklyAverages);
+      }
+    } catch (error) {
+      console.error('Failed to save mood:', error);
     }
   }
 
@@ -131,7 +187,10 @@ export default function HomeScreen(): React.JSX.Element {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Mood</Text>
+          <Text style={styles.sectionTitle}>
+            Today&apos;s Mood
+          </Text>
+
           <Text style={styles.moodValue}>
             {alreadyLogged ? todaysMood : mood}/5
           </Text>
@@ -165,6 +224,7 @@ export default function HomeScreen(): React.JSX.Element {
                 maximumTrackTintColor="#e0e0e0"
                 thumbTintColor="#111"
               />
+
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>1</Text>
                 <Text style={styles.sliderLabel}>5</Text>
@@ -174,7 +234,9 @@ export default function HomeScreen(): React.JSX.Element {
         </View>
 
         {alreadyLogged ? (
-          <Text style={styles.savedText}>✓ Mood logged for today</Text>
+          <Text style={styles.savedText}>
+            ✓ Mood logged for today
+          </Text>
         ) : (
           <TouchableOpacity style={styles.saveButton} activeOpacity={0.8} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Log Mood</Text>
@@ -236,7 +298,9 @@ export default function HomeScreen(): React.JSX.Element {
                   propsForBackgroundLines: { stroke: '#f0f0f0' },
                 }}
                 bezier
-                style={{ borderRadius: 12 }}
+                style={{
+                  borderRadius: 12,
+                }}
               />
             </View>
           ) : (
