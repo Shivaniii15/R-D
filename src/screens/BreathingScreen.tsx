@@ -62,8 +62,6 @@ export default function BreathingScreen(): React.JSX.Element {
       animationRef.current.stop();
     }
 
-    const toValue = phase === 'inhale' ? 1.4 : phase === 'exhale' ? 1 : scaleAnim;
-
     if (phase === 'inhale') {
       animationRef.current = Animated.timing(scaleAnim, {
         toValue: 1.4,
@@ -128,7 +126,15 @@ export default function BreathingScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#f0f0f0', flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
           <Feather name="arrow-left" size={22} color="#111" />
         </TouchableOpacity>
@@ -137,9 +143,11 @@ export default function BreathingScreen(): React.JSX.Element {
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
 
-        <Text style={{ fontSize: 14, color: '#aaa', textAlign: 'center', marginBottom: 8 }}>
-          Box breathing helps reduce stress and anxiety by calming your nervous system. Each phase lasts 4 seconds.
-        </Text>
+        {!isRunning && (
+          <Text style={{ fontSize: 14, color: '#aaa', textAlign: 'center', marginBottom: 8 }}>
+            Box breathing helps reduce stress and anxiety by calming your nervous system. Each phase lasts 4 seconds.
+          </Text>
+        )}
 
         <View style={{ height: 40 }} />
 
