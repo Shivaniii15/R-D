@@ -10,8 +10,9 @@ import ResourcesScreen from '../screens/ResourcesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { navigationStyles } from '../styles/Navigation.styles';
 import HomeNavigator from './HomeNavigator';
+import WellnessNavigator from './WellnessNavigator';
 
-type TabName = 'Home' | 'Journal' | 'Settings' | 'Resources';
+type TabName = 'Home' | 'Journal' | 'Settings' | 'Wellness';
 
 interface TabIconProps {
   name: TabName;
@@ -24,7 +25,7 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
     Home: 'home',
     Journal: 'book',
     Settings: 'settings',
-    Resources: 'grid',
+    Wellness: 'grid',
   };
   return <Feather name={iconMap[name]} size={22} color={color} />;
 }
@@ -53,7 +54,7 @@ export default function AppNavigator(): React.JSX.Element {
           <Tab.Screen name="Home" component={HomeNavigator} />
           <Tab.Screen name="Journal" component={JournalNavigator} />
           <Tab.Screen name="Settings" component={SettingsScreen} />
-          <Tab.Screen name="Resources" component={ResourcesScreen} />
+          <Tab.Screen name="Wellness" component={WellnessNavigator} />
         </Tab.Navigator>
       </NavigationContainer>
     </>
