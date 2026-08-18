@@ -188,7 +188,7 @@ export default function HomeScreen(): React.JSX.Element {
               Need help now?
             </Text>
             <Text style={{ fontSize: 12, color: '#555', marginTop: 2 }}>
-              Call or text 1737 — free NZ mental health support, available 24/7
+              Call or text 1737 - free NZ mental health support, available 24/7
             </Text>
           </View>
           <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>Tap to call</Text>
