@@ -6,11 +6,10 @@ import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
 import DisclaimerNotice from '../components/DisclaimerNotice';
 import JournalNavigator from './JournalNavigator';
-import ResourcesScreen from '../screens/ResourcesScreen';
+import WellnessNavigator from './WellnessNavigator';
 import SettingsScreen from '../screens/SettingsScreen';
 import { navigationStyles } from '../styles/Navigation.styles';
 import HomeNavigator from './HomeNavigator';
-import WellnessNavigator from './WellnessNavigator';
 
 type TabName = 'Home' | 'Journal' | 'Settings' | 'Wellness';
 
@@ -25,7 +24,7 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
     Home: 'home',
     Journal: 'book',
     Settings: 'settings',
-    Wellness: 'grid',
+    Wellness: 'heart',
   };
   return <Feather name={iconMap[name]} size={22} color={color} />;
 }
