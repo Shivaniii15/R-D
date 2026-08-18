@@ -6,6 +6,7 @@ import {
   Dimensions,
   ScrollView,
   BackHandler,
+  Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Slider from '@react-native-community/slider';
@@ -80,10 +81,6 @@ export default function HomeScreen(): React.JSX.Element {
             setWeeklyAverages(savedWeeklyAverages);
           }
 
-          /*
-           * Recheck the reminder whenever the Home screen becomes
-           * active.
-           */
           await updateMoodReminder();
         } catch (error) {
           console.error('Failed to load mood data:', error);
@@ -124,10 +121,6 @@ export default function HomeScreen(): React.JSX.Element {
 
       setTodaysMood(mood);
 
-      /*
-       * The user has now logged today's mood, so any pending
-       * reminder should be cancelled.
-       */
       await cancelMoodReminder();
 
       if (selectedRange === 'Week') {
@@ -172,6 +165,35 @@ export default function HomeScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* Crisis Support Banner */}
+        <TouchableOpacity
+          onPress={() => Linking.openURL('tel:1737')}
+          activeOpacity={0.8}
+          style={{
+            backgroundColor: '#FFF3CD',
+            marginHorizontal: 16,
+            marginTop: 12,
+            marginBottom: 4,
+            borderRadius: 12,
+            padding: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: '#FFE082',
+          }}>
+          <Text style={{ fontSize: 20, marginRight: 10 }}>🆘</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 13, fontWeight: '700', color: '#111' }}>
+              Need help now?
+            </Text>
+            <Text style={{ fontSize: 12, color: '#555', marginTop: 2 }}>
+              Call or text 1737 — free NZ mental health support, available 24/7
+            </Text>
+          </View>
+          <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>Tap to call</Text>
+        </TouchableOpacity>
+
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
@@ -197,7 +219,6 @@ export default function HomeScreen(): React.JSX.Element {
 
           {!alreadyLogged && (
             <>
-              {/* Emoji Quick Select */}
               <View style={styles.emojiRow}>
                 {EMOJIS.map(item => (
                   <TouchableOpacity
@@ -213,7 +234,6 @@ export default function HomeScreen(): React.JSX.Element {
                 ))}
               </View>
 
-              {/* Slider */}
               <Slider
                 minimumValue={1}
                 maximumValue={5}
@@ -251,7 +271,6 @@ export default function HomeScreen(): React.JSX.Element {
         </TouchableOpacity>
 
         <View style={styles.section}>
-          {/* Range Filters */}
           <View style={styles.rangeRow}>
             {(['Week', 'Month', '3 Months'] as RangeOption[]).map(r => (
               <TouchableOpacity
@@ -265,7 +284,6 @@ export default function HomeScreen(): React.JSX.Element {
             ))}
           </View>
 
-          {/* Stats */}
           <View style={styles.statRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Average Mood</Text>
@@ -277,7 +295,6 @@ export default function HomeScreen(): React.JSX.Element {
             </View>
           </View>
 
-          {/* Chart */}
           {hasAnyData ? (
             <View style={styles.chartContainer}>
               <LineChart
@@ -298,9 +315,7 @@ export default function HomeScreen(): React.JSX.Element {
                   propsForBackgroundLines: { stroke: '#f0f0f0' },
                 }}
                 bezier
-                style={{
-                  borderRadius: 12,
-                }}
+                style={{ borderRadius: 12 }}
               />
             </View>
           ) : (
