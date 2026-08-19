@@ -6,12 +6,13 @@ import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
 import DisclaimerNotice from '../components/DisclaimerNotice';
 import JournalNavigator from './JournalNavigator';
+import TodayRemindersScreen from '../screens/TodayRemindersScreen';
 import ResourcesScreen from '../screens/ResourcesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import { navigationStyles } from '../styles/Navigation.styles';
 import HomeNavigator from './HomeNavigator';
 
-type TabName = 'Home' | 'Journal' | 'Settings' | 'Resources';
+type TabName = 'Home' | 'Journal' | 'Reminders' | 'Settings' | 'Resources';
 
 interface TabIconProps {
   name: TabName;
@@ -23,6 +24,7 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
   const iconMap: Record<TabName, string> = {
     Home: 'home',
     Journal: 'book',
+    Reminders: 'check-circle',
     Settings: 'settings',
     Resources: 'grid',
   };
@@ -52,6 +54,7 @@ export default function AppNavigator(): React.JSX.Element {
           })}>
           <Tab.Screen name="Home" component={HomeNavigator} />
           <Tab.Screen name="Journal" component={JournalNavigator} />
+          <Tab.Screen name="Reminders" component={TodayRemindersScreen} />
           <Tab.Screen name="Settings" component={SettingsScreen} />
           <Tab.Screen name="Resources" component={ResourcesScreen} />
         </Tab.Navigator>
