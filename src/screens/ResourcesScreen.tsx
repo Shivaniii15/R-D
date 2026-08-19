@@ -7,6 +7,8 @@ import {
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import Feather from 'react-native-vector-icons/Feather';
 import { resourceStyles as styles } from '../styles/resources.styles';
 
 type Category = 'International' | 'All Students' | 'Staff';
@@ -139,8 +141,8 @@ const resources: Record<Category, Resource[]> = {
 };
 
 export default function ResourcesScreen(): React.JSX.Element {
+  const navigation = useNavigation();
   const [activeCategory, setActiveCategory] = useState<Category>('International');
-
   const categories: Category[] = ['International', 'All Students', 'Staff'];
 
   function handlePress(resource: Resource) {
@@ -152,10 +154,14 @@ export default function ResourcesScreen(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.heading}>Resources</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
+            <Feather name="arrow-left" size={22} color="#111" />
+          </TouchableOpacity>
+          <Text style={styles.heading}>Resources</Text>
+        </View>
       </View>
 
-      {/* Category Tabs */}
       <View style={styles.categoryRow}>
         {categories.map(cat => (
           <TouchableOpacity
@@ -176,7 +182,6 @@ export default function ResourcesScreen(): React.JSX.Element {
         ))}
       </View>
 
-      {/* Resource Cards */}
       <ScrollView contentContainerStyle={styles.listContainer}>
         {resources[activeCategory].map(resource => (
           <TouchableOpacity
