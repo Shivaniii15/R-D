@@ -136,4 +136,21 @@ export const moodHistoryStyles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
   },
+
+  clearButton: {
+  marginHorizontal: 20,
+  marginVertical: 16,
+  paddingVertical: 14,
+  borderWidth: 1,
+  borderColor: '#e74c3c',
+  borderRadius: 12,
+  alignItems: 'center',
+  },
+  
+  clearButtonText: {
+    color: '#e74c3c',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+
 });
