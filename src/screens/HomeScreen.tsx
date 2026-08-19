@@ -21,12 +21,10 @@ import {
   WeeklyAverage,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
-import {
-  cancelMoodReminder,
-  updateMoodReminder,
-} from '../services/notification.service';
+import { cancelMoodReminder, updateMoodReminder } from '../services/notification.service';
 import { HomeStackParamList } from '../navigation/HomeNavigator';
 import { homeStyles as styles } from '../styles/home.styles';
+import { refreshMentalHealthWidget } from '../widgets/widgetUpdate.service';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -39,7 +37,6 @@ const EMOJIS = [
 ];
 
 type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'HomeMain'>;
-
 type RangeOption = 'Week' | 'Month' | '3 Months';
 
 function calcAverage(entries: MoodEntry[]): string {
@@ -114,13 +111,10 @@ export default function HomeScreen(): React.JSX.Element {
     try {
       const today = new Date().toISOString().split('T')[0];
 
-      await saveMoodEntry({
-        date: today,
-        mood,
-      });
-
+      await saveMoodEntry({ date: today, mood });
       setTodaysMood(mood);
 
+      await refreshMentalHealthWidget();
       await cancelMoodReminder();
 
       if (selectedRange === 'Week') {
@@ -142,24 +136,24 @@ export default function HomeScreen(): React.JSX.Element {
   const isWeek = selectedRange === 'Week';
 
   const chartLabels = isWeek
-    ? weekEntries.map(e => {
-        const date = new Date(`${e.date}T00:00:00`);
+    ? weekEntries.map(entry => {
+        const date = new Date(`${entry.date}T00:00:00`);
         return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
       })
-    : weeklyAverages.map(e => e.label);
+    : weeklyAverages.map(entry => entry.label);
 
   const chartData = isWeek
-    ? weekEntries.map(e => (e.mood === 0 ? 0.1 : e.mood))
-    : weeklyAverages.map(e => (e.average === 0 ? 0.1 : e.average));
+    ? weekEntries.map(entry => (entry.mood === 0 ? 0.1 : entry.mood))
+    : weeklyAverages.map(entry => (entry.average === 0 ? 0.1 : entry.average));
 
   const hasAnyData = isWeek
-    ? weekEntries.some(e => e.mood > 0)
-    : weeklyAverages.some(e => e.average > 0);
+    ? weekEntries.some(entry => entry.mood > 0)
+    : weeklyAverages.some(entry => entry.average > 0);
 
   const average = isWeek ? calcAverage(weekEntries) : calcAverageFromWeekly(weeklyAverages);
   const countLogged = isWeek
-    ? weekEntries.filter(e => e.mood > 0).length
-    : weeklyAverages.filter(e => e.average > 0).length;
+    ? weekEntries.filter(entry => entry.mood > 0).length
+    : weeklyAverages.filter(entry => entry.average > 0).length;
   const countLabel = isWeek ? 'Days Logged' : 'Weeks Logged';
 
   return (
@@ -209,10 +203,7 @@ export default function HomeScreen(): React.JSX.Element {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Today&apos;s Mood
-          </Text>
-
+          <Text style={styles.sectionTitle}>Today's Mood</Text>
           <Text style={styles.moodValue}>
             {alreadyLogged ? todaysMood : mood}/5
           </Text>
@@ -244,7 +235,6 @@ export default function HomeScreen(): React.JSX.Element {
                 maximumTrackTintColor="#e0e0e0"
                 thumbTintColor="#111"
               />
-
               <View style={styles.sliderRow}>
                 <Text style={styles.sliderLabel}>1</Text>
                 <Text style={styles.sliderLabel}>5</Text>
@@ -254,9 +244,7 @@ export default function HomeScreen(): React.JSX.Element {
         </View>
 
         {alreadyLogged ? (
-          <Text style={styles.savedText}>
-            ✓ Mood logged for today
-          </Text>
+          <Text style={styles.savedText}>✓ Mood logged for today</Text>
         ) : (
           <TouchableOpacity style={styles.saveButton} activeOpacity={0.8} onPress={handleSave}>
             <Text style={styles.saveButtonText}>Log Mood</Text>

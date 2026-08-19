@@ -25,6 +25,26 @@ interface TabIconProps {
 const Tab = createBottomTabNavigator();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
+const linking = {
+  prefixes: ['mentalhealth://'],
+  config: {
+    screens: {
+      MainTabs: {
+        screens: {
+          Home: {
+            screens: {
+              HomeMain: 'mood',
+              MoodHistory: 'mood/history',
+            },
+          },
+          Journal: 'journal',
+          Wellness: 'wellness',
+        },
+      },
+    },
+  },
+};
+
 function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
   const color = focused ? '#111' : '#bbb';
   const iconMap: Record<TabName, string> = {
@@ -64,7 +84,7 @@ export default function AppNavigator(): React.JSX.Element {
   return (
     <>
       <DisclaimerNotice />
-      <NavigationContainer ref={navigationRef} onReady={handleNavigationReady}>
+      <NavigationContainer linking={linking} ref={navigationRef} onReady={handleNavigationReady}>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           <RootStack.Screen name="MainTabs" component={MainTabs} />
           <RootStack.Screen name="ActivitySuggestion" component={ActivitySuggestionScreen} />
