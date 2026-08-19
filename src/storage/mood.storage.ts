@@ -30,15 +30,50 @@ export async function getTodaysMood(): Promise<number | null> {
   return todayEntry ? todayEntry.mood : null;
 }
 
-export async function getWeekMoods(): Promise<MoodEntry[]> {
+export async function getMoodsByDays(days: number): Promise<MoodEntry[]> {
   const entries = await getMoodEntries();
   const result: MoodEntry[] = [];
-  for (let i = 6; i >= 0; i--) {
+  for (let i = days - 1; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
     const dateStr = date.toISOString().split('T')[0];
     const entry = entries.find(e => e.date === dateStr);
     result.push({ date: dateStr, mood: entry ? entry.mood : 0 });
   }
+  return result;
+}
+
+export interface WeeklyAverage {
+  label: string;
+  average: number;
+}
+
+export async function getWeeklyAverages(weeks: number): Promise<WeeklyAverage[]> {
+  const entries = await getMoodEntries();
+  const result: WeeklyAverage[] = [];
+
+  for (let w = weeks - 1; w >= 0; w--) {
+    const weekEntries: number[] = [];
+    for (let d = 6; d >= 0; d--) {
+      const date = new Date();
+      date.setDate(date.getDate() - w * 7 - d);
+      const dateStr = date.toISOString().split('T')[0];
+      const entry = entries.find(e => e.date === dateStr);
+      if (entry && entry.mood > 0) {
+        weekEntries.push(entry.mood);
+      }
+    }
+    const avg = weekEntries.length > 0
+      ? weekEntries.reduce((s, v) => s + v, 0) / weekEntries.length
+      : 0;
+
+    // Label as the start date of the week
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - w * 7 - 6);
+    const label = `${startDate.getMonth() + 1}/${startDate.getDate()}`;
+
+    result.push({ label, average: parseFloat(avg.toFixed(1)) });
+  }
+
   return result;
 }
