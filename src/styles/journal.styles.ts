@@ -131,4 +131,108 @@ export const journalStyles = StyleSheet.create({
     color: '#333',
     lineHeight: 26,
   },
+  // AI Button
+  aiButton: {
+    backgroundColor: '#111',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    marginTop: 8,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  aiButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+    letterSpacing: 0.3,
+  },
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111',
+  },
+  modalClose: {
+    fontSize: 18,
+    color: '#aaa',
+    fontWeight: '600',
+    padding: 4,
+  },
+  modalSubtitle: {
+    fontSize: 13,
+    color: '#aaa',
+    marginBottom: 16,
+  },
+  modalList: {
+    flexGrow: 0,
+  },
+  modalCard: {
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+    marginBottom: 10,
+  },
+  modalCardTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111',
+    marginBottom: 3,
+  },
+  modalCardDate: {
+    fontSize: 11,
+    color: '#aaa',
+    marginBottom: 5,
+  },
+  modalCardBody: {
+    fontSize: 13,
+    color: '#555',
+    lineHeight: 18,
+  },
+  modalLoading: {
+    paddingVertical: 48,
+    alignItems: 'center',
+  },
+  modalLoadingText: {
+    fontSize: 14,
+    color: '#aaa',
+    marginTop: 12,
+  },
+  insightsText: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 24,
+  },
+  modalBackButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  modalBackButtonText: {
+    fontSize: 14,
+    color: '#aaa',
+    fontWeight: '500',
+  },
 });
