@@ -47,10 +47,6 @@ export default function App(): React.JSX.Element {
   );
 
   useEffect(() => {
-    /**
-     * Records that the user is currently using the app,
-     * then restarts the motivational inactivity countdown.
-     */
     async function recordAppActivity(): Promise<void> {
       try {
         await updateLastActiveTime();
@@ -72,10 +68,6 @@ export default function App(): React.JSX.Element {
           return;
         }
 
-        /*
-         * Detects whether a notification opened the app
-         * from a completely closed state.
-         */
         const initialNotification =
           await notifee.getInitialNotification();
 
@@ -83,10 +75,6 @@ export default function App(): React.JSX.Element {
           initialNotification?.notification.data
             ?.notificationType;
 
-        /*
-         * Open the movement suggestion page when an
-         * activity notification launched the app.
-         */
         if (
           initialNotificationType ===
           'physical-activity-reminder'
@@ -94,22 +82,10 @@ export default function App(): React.JSX.Element {
           await requestActivitySuggestionNavigation();
         }
 
-        /*
-         * Restore a navigation request saved by the
-         * background notification handler.
-         */
         await restorePendingActivityNavigation();
 
-        /*
-         * Opening the app counts as activity. This resets
-         * the motivational notification countdown.
-         */
         await updateLastActiveTime();
 
-        /*
-         * Refresh every notification schedule according
-         * to the user's saved preferences.
-         */
         await Promise.all([
           updateMoodReminder(),
           updateSleepReminder(),
@@ -126,10 +102,6 @@ export default function App(): React.JSX.Element {
 
     initialiseApp();
 
-    /*
-     * Handles notification presses while the React
-     * application is already running.
-     */
     const unsubscribeNotification =
       notifee.onForegroundEvent(
         ({ type, detail }) => {
@@ -154,10 +126,6 @@ export default function App(): React.JSX.Element {
               });
           }
 
-          /*
-           * Pressing any notification and returning to
-           * the app counts as app activity.
-           */
           recordAppActivity()
             .catch(error => {
               console.log(
@@ -168,10 +136,6 @@ export default function App(): React.JSX.Element {
         },
       );
 
-    /*
-     * When the user returns to the app after leaving it,
-     * reset the inactivity countdown.
-     */
     const appStateSubscription =
       AppState.addEventListener(
         'change',

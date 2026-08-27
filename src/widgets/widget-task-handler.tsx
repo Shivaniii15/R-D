@@ -1,61 +1,43 @@
 import React from 'react';
+import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
+import { MentalHealthWidget } from './MentalHealthWidget';
+import { getTodaysMood } from '../storage/mood.storage';
 
-import type {
-  WidgetTaskHandlerProps,
-} from 'react-native-android-widget';
-
-import {
-  MentalHealthWidget,
-} from './MentalHealthWidget';
-
-import {
-  getTodaysMood,
-} from '../storage/mood.storage';
-
-async function renderMentalHealthWidget(
-  props: WidgetTaskHandlerProps,
-): Promise<void> {
-  const mood =
-    await getTodaysMood();
-
-  props.renderWidget(
-    <MentalHealthWidget
-      mood={mood}
-    />,
-  );
-}
+const nameToWidget = {
+  MentalHealthWidget: MentalHealthWidget,
+};
 
 export async function widgetTaskHandler(
   props: WidgetTaskHandlerProps,
 ): Promise<void> {
+  console.log('WIDGET TASK HANDLER CALLED');
+  console.log('Widget action:', props.widgetAction);
+  console.log('Widget info:', JSON.stringify(props.widgetInfo));
+
+  const widgetInfo = props.widgetInfo;
+  const Widget =
+    nameToWidget[widgetInfo.widgetName as keyof typeof nameToWidget];
+
+  console.log('Widget name:', widgetInfo.widgetName);
+  console.log('Widget component found:', !!Widget);
+
+  const mood = await getTodaysMood();
+
   switch (props.widgetAction) {
     case 'WIDGET_ADDED':
-      await renderMentalHealthWidget(
-        props,
-      );
+      props.renderWidget(<Widget mood={mood} />);
       break;
-
     case 'WIDGET_UPDATE':
-      await renderMentalHealthWidget(
-        props,
-      );
+      props.renderWidget(<Widget mood={mood} />);
       break;
-
     case 'WIDGET_RESIZED':
-      await renderMentalHealthWidget(
-        props,
-      );
+      props.renderWidget(<Widget mood={mood} />);
       break;
-
     case 'WIDGET_CLICK':
-      await renderMentalHealthWidget(
-        props,
-      );
+      props.renderWidget(<Widget mood={mood} />);
       break;
-
     case 'WIDGET_DELETED':
       break;
-
     default:
       break;
   }
