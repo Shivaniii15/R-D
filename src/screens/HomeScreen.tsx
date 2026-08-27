@@ -38,6 +38,46 @@ const EMOJIS = [
   { emoji: '😄', value: 5, label: 'Great' },
 ];
 
+const AFFIRMATIONS = [
+  "It is okay to take things one step at a time.",
+  "You do not have to have everything figured out right now.",
+  "Rest is not a reward, it is a necessity.",
+  "You are allowed to feel whatever you are feeling today.",
+  "Small progress is still progress.",
+  "Being kind to yourself is not weakness, it is wisdom.",
+  "You have made it through hard days before.",
+  "It is okay to ask for help when you need it.",
+  "You do not have to be productive to have worth.",
+  "Taking care of yourself is not selfish.",
+  "Difficult feelings are temporary, even when they do not feel like it.",
+  "You are doing the best you can with what you have right now.",
+  "It is okay to set limits on what you can handle today.",
+  "Growth is not always visible, but it is still happening.",
+  "You deserve the same kindness you would give a friend.",
+  "Not every day has to be a good day for you to be okay.",
+  "Your feelings are valid even if others do not understand them.",
+  "Struggling does not mean failing.",
+  "You are more than your most stressful day.",
+  "It is okay to slow down.",
+  "Progress does not have to be perfect to count.",
+  "You are allowed to change your mind and your plans.",
+  "Asking for support is a sign of self-awareness, not weakness.",
+  "You have handled uncertainty before and you can handle it again.",
+  "Being a student or working hard is tough. Acknowledge that.",
+  "Your worth is not measured by your grades or productivity.",
+  "It is normal to feel overwhelmed sometimes.",
+  "You do not have to earn rest.",
+  "One bad day does not define your whole journey.",
+  "You are allowed to have needs.",
+];
+
+function getDailyAffirmation(): string {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
+}
+
 type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'HomeMain'>;
 
 type RangeOption = 'Week' | 'Month' | '3 Months';
@@ -62,6 +102,7 @@ export default function HomeScreen(): React.JSX.Element {
   const [weeklyAverages, setWeeklyAverages] = useState<WeeklyAverage[]>([]);
 
   const navigation = useNavigation<HomeNavigationProp>();
+  const todaysAffirmation = getDailyAffirmation();
 
   useFocusEffect(
     useCallback(() => {
@@ -120,7 +161,6 @@ export default function HomeScreen(): React.JSX.Element {
       });
 
       setTodaysMood(mood);
-
       await cancelMoodReminder();
 
       if (selectedRange === 'Week') {
@@ -193,6 +233,23 @@ export default function HomeScreen(): React.JSX.Element {
           </View>
           <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>Tap to call</Text>
         </TouchableOpacity>
+
+        {/* Daily Affirmation */}
+        <View style={{
+          backgroundColor: '#F0F4FF',
+          marginHorizontal: 16,
+          marginTop: 10,
+          marginBottom: 4,
+          borderRadius: 12,
+          padding: 14,
+        }}>
+          <Text style={{ fontSize: 11, color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+            Today's Reminder
+          </Text>
+          <Text style={{ fontSize: 14, color: '#333', lineHeight: 22 }}>
+            {todaysAffirmation}
+          </Text>
+        </View>
 
         <View style={styles.header}>
           <View style={styles.headerRow}>
