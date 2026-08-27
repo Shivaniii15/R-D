@@ -257,11 +257,6 @@ export default function HomeScreen(): React.JSX.Element {
               <Text style={styles.heading}>Mood logging.</Text>
               <Text style={styles.subheading}>How are you feeling today?</Text>
             </View>
-            <TouchableOpacity
-              style={styles.exitButton}
-              onPress={() => BackHandler.exitApp()}>
-              <Text style={styles.exitButtonText}>✕</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
