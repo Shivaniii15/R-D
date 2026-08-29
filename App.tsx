@@ -14,6 +14,7 @@ import notifee, {
 } from '@notifee/react-native';
 
 import AppNavigator from './src/navigation/AppNavigator';
+import { AccessibilityProvider } from './src/context/AccessibilityContext';
 
 import {
   setupNotifications,
@@ -52,38 +53,28 @@ export default function App(): React.JSX.Element {
         await updateLastActiveTime();
         await updateMotivationalReminder();
       } catch (error) {
-        console.log(
-          'Failed to update app activity:',
-          error,
-        );
+        console.log('Failed to update app activity:', error);
       }
     }
 
     async function initialiseApp(): Promise<void> {
       try {
-        const notificationsReady =
-          await setupNotifications();
+        const notificationsReady = await setupNotifications();
 
         if (!notificationsReady) {
           return;
         }
 
-        const initialNotification =
-          await notifee.getInitialNotification();
+        const initialNotification = await notifee.getInitialNotification();
 
         const initialNotificationType =
-          initialNotification?.notification.data
-            ?.notificationType;
+          initialNotification?.notification.data?.notificationType;
 
-        if (
-          initialNotificationType ===
-          'physical-activity-reminder'
-        ) {
+        if (initialNotificationType === 'physical-activity-reminder') {
           await requestActivitySuggestionNavigation();
         }
 
         await restorePendingActivityNavigation();
-
         await updateLastActiveTime();
 
         await Promise.all([
@@ -93,81 +84,42 @@ export default function App(): React.JSX.Element {
           updateMotivationalReminder(),
         ]);
       } catch (error) {
-        console.log(
-          'Failed to initialise the app:',
-          error,
-        );
+        console.log('Failed to initialise the app:', error);
       }
     }
 
     initialiseApp();
 
-    const unsubscribeNotification =
-      notifee.onForegroundEvent(
-        ({ type, detail }) => {
-          if (type !== EventType.PRESS) {
-            return;
-          }
+    const unsubscribeNotification = notifee.onForegroundEvent(({ type, detail }) => {
+      if (type !== EventType.PRESS) return;
 
-          const notificationType =
-            detail.notification?.data
-              ?.notificationType;
+      const notificationType = detail.notification?.data?.notificationType;
 
-          if (
-            notificationType ===
-            'physical-activity-reminder'
-          ) {
-            requestActivitySuggestionNavigation()
-              .catch(error => {
-                console.log(
-                  'Failed to open activity suggestion:',
-                  error,
-                );
-              });
-          }
+      if (notificationType === 'physical-activity-reminder') {
+        requestActivitySuggestionNavigation().catch(error => {
+          console.log('Failed to open activity suggestion:', error);
+        });
+      }
 
-          recordAppActivity()
-            .catch(error => {
-              console.log(
-                'Failed to record notification activity:',
-                error,
-              );
-            });
-        },
-      );
+      recordAppActivity().catch(error => {
+        console.log('Failed to record notification activity:', error);
+      });
+    });
 
-    const appStateSubscription =
-      AppState.addEventListener(
-        'change',
-        nextState => {
-          const previousState =
-            currentAppState.current;
+    const appStateSubscription = AppState.addEventListener('change', nextState => {
+      const previousState = currentAppState.current;
+      currentAppState.current = nextState;
 
-          currentAppState.current =
-            nextState;
+      if (nextState === 'active' && previousState !== 'active') {
+        restorePendingActivityNavigation().catch(error => {
+          console.log('Failed to restore activity navigation:', error);
+        });
 
-          if (
-            nextState === 'active' &&
-            previousState !== 'active'
-          ) {
-            restorePendingActivityNavigation()
-              .catch(error => {
-                console.log(
-                  'Failed to restore activity navigation:',
-                  error,
-                );
-              });
-
-            recordAppActivity()
-              .catch(error => {
-                console.log(
-                  'Failed to record app activity:',
-                  error,
-                );
-              });
-          }
-        },
-      );
+        recordAppActivity().catch(error => {
+          console.log('Failed to record app activity:', error);
+        });
+      }
+    });
 
     return () => {
       unsubscribeNotification();
@@ -176,13 +128,12 @@ export default function App(): React.JSX.Element {
   }, []);
 
   return (
-    <>
+    <AccessibilityProvider>
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#fff"
       />
-
       <AppNavigator />
-    </>
+    </AccessibilityProvider>
   );
 }
