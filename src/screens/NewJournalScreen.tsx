@@ -7,6 +7,7 @@ import { saveJournal } from '../storage/journal.storage';
 import { JournalStackParamList } from '../navigation/JournalNavigator';
 import { journalStyles as styles } from '../styles/journal.styles';
 import Feather from 'react-native-vector-icons/Feather';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'NewJournal'>;
 
@@ -37,6 +38,7 @@ export default function NewJournalScreen(): React.JSX.Element {
   const [body, setBody] = useState('');
   const [prompt, setPrompt] = useState(getRandomPrompt());
   const navigation = useNavigation<NavProp>();
+  const { scale } = useAccessibility();
 
   async function handleSave() {
     if (!title.trim()) {
@@ -60,11 +62,11 @@ export default function NewJournalScreen(): React.JSX.Element {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.cancel}>Cancel</Text>
+          <Text style={[styles.cancel, { fontSize: scale(15) }]}>Cancel</Text>
         </TouchableOpacity>
-        <Text style={styles.heading}>New Journal</Text>
+        <Text style={[styles.heading, { fontSize: scale(20) }]}>New Journal</Text>
         <TouchableOpacity onPress={handleSave}>
-          <Text style={styles.saveText}>Save</Text>
+          <Text style={[styles.saveText, { fontSize: scale(15) }]}>Save</Text>
         </TouchableOpacity>
       </View>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -80,20 +82,20 @@ export default function NewJournalScreen(): React.JSX.Element {
             alignItems: 'center',
           }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 11, color: '#888', marginBottom: 4, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              <Text style={{ fontSize: scale(11), color: '#888', marginBottom: 4, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 }}>
                 Prompt Suggestion
               </Text>
-              <Text style={{ fontSize: 14, color: '#333', lineHeight: 20 }}>
+              <Text style={{ fontSize: scale(14), color: '#333', lineHeight: 20 }}>
                 {prompt}
               </Text>
             </View>
             <TouchableOpacity onPress={handleNewPrompt} style={{ marginLeft: 12, padding: 4 }}>
-              <Feather name="refresh-cw" size={18} color="#888" />
+              <Feather name="refresh-cw" size={scale(18)} color="#888" />
             </TouchableOpacity>
           </View>
 
           <TextInput
-            style={styles.titleInput}
+            style={[styles.titleInput, { fontSize: scale(22) }]}
             placeholder="Title"
             placeholderTextColor="#bbb"
             value={title}
@@ -102,7 +104,7 @@ export default function NewJournalScreen(): React.JSX.Element {
           />
           <View style={styles.divider} />
           <TextInput
-            style={styles.bodyInput}
+            style={[styles.bodyInput, { fontSize: scale(16) }]}
             placeholder="Write your thoughts..."
             placeholderTextColor="#bbb"
             value={body}
