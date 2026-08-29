@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Feather from 'react-native-vector-icons/Feather';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 type WellnessStackParamList = {
   WellnessHome: undefined;
@@ -57,6 +58,7 @@ const options: WellnessOption[] = [
 
 export default function WellnessScreen(): React.JSX.Element {
   const navigation = useNavigation<NavigationProp>();
+  const { scale } = useAccessibility();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -68,8 +70,8 @@ export default function WellnessScreen(): React.JSX.Element {
           borderBottomWidth: 1,
           borderBottomColor: '#f0f0f0',
         }}>
-          <Text style={{ fontSize: 24, fontWeight: '700', color: '#111' }}>Wellness</Text>
-          <Text style={{ fontSize: 14, color: '#aaa', marginTop: 4 }}>Tools to support your wellbeing.</Text>
+          <Text style={{ fontSize: scale(24), fontWeight: '700', color: '#111' }}>Wellness</Text>
+          <Text style={{ fontSize: scale(14), color: '#aaa', marginTop: 4 }}>Tools to support your wellbeing.</Text>
         </View>
 
         <View style={{ paddingHorizontal: 20, paddingTop: 24 }}>
@@ -97,13 +99,13 @@ export default function WellnessScreen(): React.JSX.Element {
                 justifyContent: 'center',
                 marginRight: 16,
               }}>
-                <Feather name={option.icon} size={22} color="#111" />
+                <Feather name={option.icon} size={scale(22)} color="#111" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, fontWeight: '600', color: '#111' }}>{option.title}</Text>
-                <Text style={{ fontSize: 13, color: '#aaa', marginTop: 3 }}>{option.description}</Text>
+                <Text style={{ fontSize: scale(16), fontWeight: '600', color: '#111' }}>{option.title}</Text>
+                <Text style={{ fontSize: scale(13), color: '#aaa', marginTop: 3 }}>{option.description}</Text>
               </View>
-              <Feather name="chevron-right" size={20} color="#bbb" />
+              <Feather name="chevron-right" size={scale(20)} color="#bbb" />
             </TouchableOpacity>
           ))}
         </View>
