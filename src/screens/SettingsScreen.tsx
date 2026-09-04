@@ -55,58 +55,20 @@ import {
 
 import ActivityReminderSettings from '../components/ActivityReminderSettings';
 import MotivationalReminderSettings from '../components/MotivationalReminderSettings';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 export default function SettingsScreen(): React.JSX.Element {
-  const [
-    remindersEnabled,
-    setLocalRemindersEnabled,
-  ] = useState<boolean>(true);
+  const { largeText, toggleLargeText, scale } = useAccessibility();
 
-  const [
-    sleepRemindersEnabled,
-    setLocalSleepRemindersEnabled,
-  ] = useState<boolean>(false);
-
-  const [
-    selectedTime,
-    setSelectedTime,
-  ] = useState<ReminderTime>({
-    hour: 20,
-    minute: 0,
-  });
-
-  const [
-    selectedSleepTime,
-    setSelectedSleepTime,
-  ] = useState<SleepReminderTime>({
-    hour: 22,
-    minute: 0,
-  });
-
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState<boolean>(true);
-
-  const [
-    isUpdatingMood,
-    setIsUpdatingMood,
-  ] = useState<boolean>(false);
-
-  const [
-    isUpdatingSleep,
-    setIsUpdatingSleep,
-  ] = useState<boolean>(false);
-
-  const [
-    showTimePicker,
-    setShowTimePicker,
-  ] = useState<boolean>(false);
-
-  const [
-    showSleepTimePicker,
-    setShowSleepTimePicker,
-  ] = useState<boolean>(false);
+  const [remindersEnabled, setLocalRemindersEnabled] = useState<boolean>(true);
+  const [sleepRemindersEnabled, setLocalSleepRemindersEnabled] = useState<boolean>(false);
+  const [selectedTime, setSelectedTime] = useState<ReminderTime>({ hour: 20, minute: 0 });
+  const [selectedSleepTime, setSelectedSleepTime] = useState<SleepReminderTime>({ hour: 22, minute: 0 });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isUpdatingMood, setIsUpdatingMood] = useState<boolean>(false);
+  const [isUpdatingSleep, setIsUpdatingSleep] = useState<boolean>(false);
+  const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+  const [showSleepTimePicker, setShowSleepTimePicker] = useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -114,23 +76,15 @@ export default function SettingsScreen(): React.JSX.Element {
 
       async function loadSettings(): Promise<void> {
         setIsLoading(true);
-
         try {
-          const [
-            moodEnabled,
-            moodTime,
-            sleepEnabled,
-            sleepTime,
-          ] = await Promise.all([
+          const [moodEnabled, moodTime, sleepEnabled, sleepTime] = await Promise.all([
             getRemindersEnabled(),
             getReminderTime(),
             getSleepRemindersEnabled(),
             getSleepReminderTime(),
           ]);
 
-          if (!isActive) {
-            return;
-          }
+          if (!isActive) return;
 
           setLocalRemindersEnabled(moodEnabled);
           setSelectedTime(moodTime);
@@ -139,27 +93,20 @@ export default function SettingsScreen(): React.JSX.Element {
         } catch (error) {
           console.log('Failed to load settings:', error);
         } finally {
-          if (isActive) {
-            setIsLoading(false);
-          }
+          if (isActive) setIsLoading(false);
         }
       }
 
       loadSettings();
-
-      return () => {
-        isActive = false;
-      };
+      return () => { isActive = false; };
     }, []),
   );
 
   async function handleReminderToggle(enabled: boolean): Promise<void> {
     if (isUpdatingMood) return;
-
     const previousValue = remindersEnabled;
     setLocalRemindersEnabled(enabled);
     setIsUpdatingMood(true);
-
     try {
       await setRemindersEnabled(enabled);
       if (enabled) {
@@ -169,9 +116,7 @@ export default function SettingsScreen(): React.JSX.Element {
       }
     } catch (error) {
       setLocalRemindersEnabled(previousValue);
-      try {
-        await setRemindersEnabled(previousValue);
-      } catch (restoreError) {
+      try { await setRemindersEnabled(previousValue); } catch (restoreError) {
         console.log('Failed to restore self-care reminder setting:', restoreError);
       }
       console.log('Failed to update self-care reminders:', error);
@@ -183,48 +128,33 @@ export default function SettingsScreen(): React.JSX.Element {
 
   async function handleSleepReminderToggle(enabled: boolean): Promise<void> {
     if (isUpdatingSleep) return;
-
     const previousValue = sleepRemindersEnabled;
     setLocalSleepRemindersEnabled(enabled);
     setIsUpdatingSleep(true);
-
     try {
       await setSleepRemindersEnabled(enabled);
-
       if (!enabled) {
         await cancelSleepReminder();
         return;
       }
-
       const result = await updateSleepReminder();
-
       if (result.permissionRequired) {
         Alert.alert(
           'Permission required',
           'Sleep reminders need permission to schedule alarms. Open Android settings and allow Alarms & reminders?',
           [
             { text: 'Not now', style: 'cancel' },
-            {
-              text: 'Open settings',
-              onPress: () => {
-                openSleepAlarmPermissionSettings().catch(error => {
-                  console.log('Failed to open alarm settings:', error);
-                });
-              },
-            },
+            { text: 'Open settings', onPress: () => { openSleepAlarmPermissionSettings().catch(error => { console.log('Failed to open alarm settings:', error); }); } },
           ],
         );
         return;
       }
-
       if (!result.scheduled) {
         Alert.alert('Reminder not scheduled', 'Check that notifications are enabled for this app, then try again.');
       }
     } catch (error) {
       setLocalSleepRemindersEnabled(previousValue);
-      try {
-        await setSleepRemindersEnabled(previousValue);
-      } catch (restoreError) {
+      try { await setSleepRemindersEnabled(previousValue); } catch (restoreError) {
         console.log('Failed to restore sleep reminder setting:', restoreError);
       }
       console.log('Failed to update sleep reminders:', error);
@@ -235,17 +165,13 @@ export default function SettingsScreen(): React.JSX.Element {
   }
 
   function handleTimeChange(event: DateTimePickerEvent, date?: Date): void {
-    if (Platform.OS === 'android') {
-      setShowTimePicker(false);
-    }
+    if (Platform.OS === 'android') setShowTimePicker(false);
     if (event.type === 'dismissed' || date === undefined) return;
     setSelectedTime({ hour: date.getHours(), minute: date.getMinutes() });
   }
 
   function handleSleepTimeChange(event: DateTimePickerEvent, date?: Date): void {
-    if (Platform.OS === 'android') {
-      setShowSleepTimePicker(false);
-    }
+    if (Platform.OS === 'android') setShowSleepTimePicker(false);
     if (event.type === 'dismissed' || date === undefined) return;
     setSelectedSleepTime({ hour: date.getHours(), minute: date.getMinutes() });
   }
@@ -255,9 +181,7 @@ export default function SettingsScreen(): React.JSX.Element {
     setIsUpdatingMood(true);
     try {
       await setReminderTime(selectedTime);
-      if (remindersEnabled) {
-        await updateMoodReminder();
-      }
+      if (remindersEnabled) await updateMoodReminder();
       Alert.alert('Reminder time saved', `Your self-care reminder has been set for ${formatTime(selectedTime)}.`);
     } catch (error) {
       console.log('Failed to save reminder time:', error);
@@ -272,38 +196,26 @@ export default function SettingsScreen(): React.JSX.Element {
     setIsUpdatingSleep(true);
     try {
       await setSleepReminderTime(selectedSleepTime);
-
       if (!sleepRemindersEnabled) {
         Alert.alert('Bedtime saved', `Your bedtime has been saved as ${formatTime(selectedSleepTime)}. Enable sleep reminders to receive notifications.`);
         return;
       }
-
       const result = await updateSleepReminder();
-
       if (result.permissionRequired) {
         Alert.alert(
           'Permission required',
           'Allow Alarms & reminders for this app. After enabling it, return to the app and tap Save bedtime again.',
           [
             { text: 'Not now', style: 'cancel' },
-            {
-              text: 'Open settings',
-              onPress: () => {
-                openSleepAlarmPermissionSettings().catch(error => {
-                  console.log('Failed to open alarm settings:', error);
-                });
-              },
-            },
+            { text: 'Open settings', onPress: () => { openSleepAlarmPermissionSettings().catch(error => { console.log('Failed to open alarm settings:', error); }); } },
           ],
         );
         return;
       }
-
       if (!result.scheduled) {
         Alert.alert('Sleep reminder not scheduled', 'Check that app notifications are enabled, then try saving your bedtime again.');
         return;
       }
-
       Alert.alert('Bedtime saved', `Your sleep reminder has been scheduled for ${formatTime(selectedSleepTime)}.`);
     } catch (error) {
       console.log('Failed to save bedtime:', error);
@@ -331,21 +243,41 @@ export default function SettingsScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
-        <Text style={styles.heading}>Settings</Text>
-        <Text style={styles.subheading}>Control your application preferences.</Text>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <Text style={[styles.heading, { fontSize: scale(30) }]}>Settings</Text>
+        <Text style={[styles.subheading, { fontSize: scale(16) }]}>Control your application preferences.</Text>
 
-        <Text style={styles.sectionHeading}>Self-care</Text>
+        {/* Accessibility */}
+        <Text style={[styles.sectionHeading, { fontSize: scale(20) }]}>Accessibility</Text>
 
         <View style={styles.settingCard}>
           <View style={styles.settingTextContainer}>
-            <Text style={styles.settingTitle}>Self-care reminders</Text>
-            <Text style={styles.settingDescription}>
+            <Text style={[styles.settingTitle, { fontSize: scale(17) }]}>Larger text</Text>
+            <Text style={[styles.settingDescription, { fontSize: scale(14) }]}>
+              Increases the text size across the app to make it easier to read.
+            </Text>
+            <Text style={[styles.statusText, { fontSize: scale(13) }]}>
+              {largeText ? 'Large text is on' : 'Large text is off'}
+            </Text>
+          </View>
+          <Switch
+            value={largeText}
+            onValueChange={toggleLargeText}
+            trackColor={{ false: '#d5d5d5', true: '#777777' }}
+            thumbColor={largeText ? '#111111' : '#f4f4f4'}
+          />
+        </View>
+
+        {/* Self-care */}
+        <Text style={[styles.sectionHeading, { fontSize: scale(20) }]}>Self-care</Text>
+
+        <View style={styles.settingCard}>
+          <View style={styles.settingTextContainer}>
+            <Text style={[styles.settingTitle, { fontSize: scale(17) }]}>Self-care reminders</Text>
+            <Text style={[styles.settingDescription, { fontSize: scale(14) }]}>
               Receive a daily notification when you have not logged your mood.
             </Text>
-            <Text style={styles.statusText}>
+            <Text style={[styles.statusText, { fontSize: scale(13) }]}>
               {remindersEnabled ? 'Reminders are enabled' : 'Reminders are disabled'}
             </Text>
           </View>
@@ -359,15 +291,12 @@ export default function SettingsScreen(): React.JSX.Element {
         </View>
 
         <View style={styles.timeCard}>
-          <Text style={styles.settingTitle}>Self-care reminder time</Text>
-          <Text style={styles.settingDescription}>
+          <Text style={[styles.settingTitle, { fontSize: scale(17) }]}>Self-care reminder time</Text>
+          <Text style={[styles.settingDescription, { fontSize: scale(14) }]}>
             Choose when you would like to receive your daily self-care reminder.
           </Text>
-          <Pressable
-            style={styles.timeButton}
-            onPress={() => setShowTimePicker(true)}
-            disabled={isUpdatingMood}>
-            <Text style={styles.timeButtonText}>{formatTime(selectedTime)}</Text>
+          <Pressable style={styles.timeButton} onPress={() => setShowTimePicker(true)} disabled={isUpdatingMood}>
+            <Text style={[styles.timeButtonText, { fontSize: scale(24) }]}>{formatTime(selectedTime)}</Text>
           </Pressable>
           {showTimePicker && (
             <DateTimePicker
@@ -382,19 +311,20 @@ export default function SettingsScreen(): React.JSX.Element {
             style={[styles.saveButton, isUpdatingMood && styles.disabledButton]}
             onPress={handleSaveTime}
             disabled={isUpdatingMood}>
-            <Text style={styles.saveButtonText}>Save reminder time</Text>
+            <Text style={[styles.saveButtonText, { fontSize: scale(15) }]}>Save reminder time</Text>
           </Pressable>
         </View>
 
-        <Text style={styles.sectionHeading}>Sleep</Text>
+        {/* Sleep */}
+        <Text style={[styles.sectionHeading, { fontSize: scale(20) }]}>Sleep</Text>
 
         <View style={styles.settingCard}>
           <View style={styles.settingTextContainer}>
-            <Text style={styles.settingTitle}>Sleep reminders</Text>
-            <Text style={styles.settingDescription}>
+            <Text style={[styles.settingTitle, { fontSize: scale(17) }]}>Sleep reminders</Text>
+            <Text style={[styles.settingDescription, { fontSize: scale(14) }]}>
               Receive a notification when your scheduled bedtime arrives.
             </Text>
-            <Text style={styles.statusText}>
+            <Text style={[styles.statusText, { fontSize: scale(13) }]}>
               {sleepRemindersEnabled ? 'Sleep reminders are enabled' : 'Sleep reminders are disabled'}
             </Text>
           </View>
@@ -408,15 +338,12 @@ export default function SettingsScreen(): React.JSX.Element {
         </View>
 
         <View style={styles.timeCard}>
-          <Text style={styles.settingTitle}>Bedtime</Text>
-          <Text style={styles.settingDescription}>
+          <Text style={[styles.settingTitle, { fontSize: scale(17) }]}>Bedtime</Text>
+          <Text style={[styles.settingDescription, { fontSize: scale(14) }]}>
             Choose when you would like to receive your sleep reminder.
           </Text>
-          <Pressable
-            style={styles.timeButton}
-            onPress={() => setShowSleepTimePicker(true)}
-            disabled={isUpdatingSleep}>
-            <Text style={styles.timeButtonText}>{formatTime(selectedSleepTime)}</Text>
+          <Pressable style={styles.timeButton} onPress={() => setShowSleepTimePicker(true)} disabled={isUpdatingSleep}>
+            <Text style={[styles.timeButtonText, { fontSize: scale(24) }]}>{formatTime(selectedSleepTime)}</Text>
           </Pressable>
           {showSleepTimePicker && (
             <DateTimePicker
@@ -431,7 +358,7 @@ export default function SettingsScreen(): React.JSX.Element {
             style={[styles.saveButton, isUpdatingSleep && styles.disabledButton]}
             onPress={handleSaveSleepTime}
             disabled={isUpdatingSleep}>
-            <Text style={styles.saveButtonText}>Save bedtime</Text>
+            <Text style={[styles.saveButtonText, { fontSize: scale(15) }]}>Save bedtime</Text>
           </Pressable>
         </View>
 
@@ -441,7 +368,7 @@ export default function SettingsScreen(): React.JSX.Element {
         {(isUpdatingMood || isUpdatingSleep) && (
           <View style={styles.updatingContainer}>
             <ActivityIndicator size="small" />
-            <Text style={styles.updatingText}>Updating reminder settings...</Text>
+            <Text style={[styles.updatingText, { fontSize: scale(13) }]}>Updating reminder settings...</Text>
           </View>
         )}
 
@@ -466,7 +393,7 @@ export default function SettingsScreen(): React.JSX.Element {
             borderWidth: 1,
             borderColor: '#FFCCCC',
           }}>
-          <Text style={{ color: '#CC0000', fontWeight: '600', fontSize: 15 }}>Exit App</Text>
+          <Text style={{ color: '#CC0000', fontWeight: '600', fontSize: scale(15) }}>Exit App</Text>
         </TouchableOpacity>
 
       </ScrollView>

@@ -27,6 +27,7 @@ import {
 } from '../services/notification.service';
 import { HomeStackParamList } from '../navigation/HomeNavigator';
 import { homeStyles as styles } from '../styles/home.styles';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -102,6 +103,7 @@ export default function HomeScreen(): React.JSX.Element {
   const [weeklyAverages, setWeeklyAverages] = useState<WeeklyAverage[]>([]);
 
   const navigation = useNavigation<HomeNavigationProp>();
+  const { scale } = useAccessibility();
   const todaysAffirmation = getDailyAffirmation();
 
   useFocusEffect(
@@ -154,12 +156,7 @@ export default function HomeScreen(): React.JSX.Element {
   async function handleSave(): Promise<void> {
     try {
       const today = new Date().toISOString().split('T')[0];
-
-      await saveMoodEntry({
-        date: today,
-        mood,
-      });
-
+      await saveMoodEntry({ date: today, mood });
       setTodaysMood(mood);
       await cancelMoodReminder();
 
@@ -222,16 +219,16 @@ export default function HomeScreen(): React.JSX.Element {
             borderWidth: 1,
             borderColor: '#FFE082',
           }}>
-          <Text style={{ fontSize: 20, marginRight: 10 }}>🆘</Text>
+          <Text style={{ fontSize: scale(20), marginRight: 10 }}>🆘</Text>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: '#111' }}>
+            <Text style={{ fontSize: scale(13), fontWeight: '700', color: '#111' }}>
               Need help now?
             </Text>
-            <Text style={{ fontSize: 12, color: '#555', marginTop: 2 }}>
+            <Text style={{ fontSize: scale(12), color: '#555', marginTop: 2 }}>
               Call or text 1737 - free NZ mental health support, available 24/7
             </Text>
           </View>
-          <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>Tap to call</Text>
+          <Text style={{ fontSize: scale(12), color: '#888', marginLeft: 8 }}>Tap to call</Text>
         </TouchableOpacity>
 
         {/* Daily Affirmation */}
@@ -243,10 +240,10 @@ export default function HomeScreen(): React.JSX.Element {
           borderRadius: 12,
           padding: 14,
         }}>
-          <Text style={{ fontSize: 11, color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+          <Text style={{ fontSize: scale(11), color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
             Today's Reminder
           </Text>
-          <Text style={{ fontSize: 14, color: '#333', lineHeight: 22 }}>
+          <Text style={{ fontSize: scale(14), color: '#333', lineHeight: 22 }}>
             {todaysAffirmation}
           </Text>
         </View>
@@ -254,18 +251,18 @@ export default function HomeScreen(): React.JSX.Element {
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.heading}>Mood logging.</Text>
-              <Text style={styles.subheading}>How are you feeling today?</Text>
+              <Text style={[styles.heading, { fontSize: scale(24) }]}>Mood logging.</Text>
+              <Text style={[styles.subheading, { fontSize: scale(14) }]}>How are you feeling today?</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
+          <Text style={[styles.sectionTitle, { fontSize: scale(16) }]}>
             Today&apos;s Mood
           </Text>
 
-          <Text style={styles.moodValue}>
+          <Text style={[styles.moodValue, { fontSize: scale(48) }]}>
             {alreadyLogged ? todaysMood : mood}/5
           </Text>
 
@@ -280,8 +277,8 @@ export default function HomeScreen(): React.JSX.Element {
                       mood === item.value && styles.emojiButtonSelected,
                     ]}
                     onPress={() => setMood(item.value)}>
-                    <Text style={styles.emojiText}>{item.emoji}</Text>
-                    <Text style={styles.emojiLabel}>{item.label}</Text>
+                    <Text style={[styles.emojiText, { fontSize: scale(28) }]}>{item.emoji}</Text>
+                    <Text style={[styles.emojiLabel, { fontSize: scale(10) }]}>{item.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -298,20 +295,20 @@ export default function HomeScreen(): React.JSX.Element {
               />
 
               <View style={styles.sliderRow}>
-                <Text style={styles.sliderLabel}>1</Text>
-                <Text style={styles.sliderLabel}>5</Text>
+                <Text style={[styles.sliderLabel, { fontSize: scale(12) }]}>1</Text>
+                <Text style={[styles.sliderLabel, { fontSize: scale(12) }]}>5</Text>
               </View>
             </>
           )}
         </View>
 
         {alreadyLogged ? (
-          <Text style={styles.savedText}>
+          <Text style={[styles.savedText, { fontSize: scale(13) }]}>
             ✓ Mood logged for today
           </Text>
         ) : (
           <TouchableOpacity style={styles.saveButton} activeOpacity={0.8} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Log Mood</Text>
+            <Text style={[styles.saveButtonText, { fontSize: scale(15) }]}>Log Mood</Text>
           </TouchableOpacity>
         )}
 
@@ -319,7 +316,7 @@ export default function HomeScreen(): React.JSX.Element {
           style={styles.historyButton}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('MoodHistory')}>
-          <Text style={styles.historyButtonText}>View Mood History</Text>
+          <Text style={[styles.historyButtonText, { fontSize: scale(15) }]}>View Mood History</Text>
         </TouchableOpacity>
 
         <View style={styles.section}>
@@ -329,7 +326,7 @@ export default function HomeScreen(): React.JSX.Element {
                 key={r}
                 style={[styles.rangeButton, selectedRange === r && styles.rangeButtonSelected]}
                 onPress={() => handleRangeChange(r)}>
-                <Text style={[styles.rangeButtonText, selectedRange === r && styles.rangeButtonTextSelected]}>
+                <Text style={[styles.rangeButtonText, selectedRange === r && styles.rangeButtonTextSelected, { fontSize: scale(13) }]}>
                   {r}
                 </Text>
               </TouchableOpacity>
@@ -338,12 +335,12 @@ export default function HomeScreen(): React.JSX.Element {
 
           <View style={styles.statRow}>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Average Mood</Text>
-              <Text style={styles.statValue}>{average}</Text>
+              <Text style={[styles.statLabel, { fontSize: scale(12) }]}>Average Mood</Text>
+              <Text style={[styles.statValue, { fontSize: scale(24) }]}>{average}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>{countLabel}</Text>
-              <Text style={styles.statValue}>{countLogged}</Text>
+              <Text style={[styles.statLabel, { fontSize: scale(12) }]}>{countLabel}</Text>
+              <Text style={[styles.statValue, { fontSize: scale(24) }]}>{countLogged}</Text>
             </View>
           </View>
 
@@ -371,7 +368,7 @@ export default function HomeScreen(): React.JSX.Element {
               />
             </View>
           ) : (
-            <Text style={styles.noDataText}>No mood data for this period yet.</Text>
+            <Text style={[styles.noDataText, { fontSize: scale(14) }]}>No mood data for this period yet.</Text>
           )}
         </View>
 
