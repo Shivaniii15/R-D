@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +17,7 @@ import { JournalStackParamList } from '../navigation/JournalNavigator';
 import { journalStyles as styles } from '../styles/journal.styles';
 import Feather from 'react-native-vector-icons/Feather';
 import { useAccessibility } from '../context/AccessibilityContext';
+import Voice from '@dev-amirzubair/react-native-voice';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'NewJournal'>;
 
@@ -37,8 +47,30 @@ export default function NewJournalScreen(): React.JSX.Element {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [prompt, setPrompt] = useState(getRandomPrompt());
+  const [isListening, setIsListening] = useState(false);
   const navigation = useNavigation<NavProp>();
   const { scale } = useAccessibility();
+
+  useEffect(() => {
+    Voice.onSpeechResults = (e: any) => {
+      if (e.value && e.value.length > 0) {
+        setBody(prev => prev + (prev ? ' ' : '') + e.value[0]);
+      }
+    };
+
+    Voice.onSpeechError = (e: any) => {
+      console.log('Speech error:', e);
+      setIsListening(false);
+    };
+
+    Voice.onSpeechEnd = () => {
+      setIsListening(false);
+    };
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
 
   async function handleSave() {
     if (!title.trim()) {
@@ -56,6 +88,21 @@ export default function NewJournalScreen(): React.JSX.Element {
 
   function handleNewPrompt() {
     setPrompt(getRandomPrompt());
+  }
+
+  async function handleVoiceToggle() {
+    try {
+      if (isListening) {
+        await Voice.stop();
+        setIsListening(false);
+      } else {
+        await Voice.start('en-NZ');
+        setIsListening(true);
+      }
+    } catch (e) {
+      console.log('Voice error:', e);
+      setIsListening(false);
+    }
   }
 
   return (
@@ -103,15 +150,42 @@ export default function NewJournalScreen(): React.JSX.Element {
             maxLength={100}
           />
           <View style={styles.divider} />
-          <TextInput
-            style={[styles.bodyInput, { fontSize: scale(16) }]}
-            placeholder="Write your thoughts..."
-            placeholderTextColor="#bbb"
-            value={body}
-            onChangeText={setBody}
-            multiline
-            textAlignVertical="top"
-          />
+
+          {/* Body input with mic button */}
+          <View style={{ position: 'relative' }}>
+            <TextInput
+              style={[styles.bodyInput, { fontSize: scale(16), paddingRight: 48 }]}
+              placeholder="Write your thoughts..."
+              placeholderTextColor="#bbb"
+              value={body}
+              onChangeText={setBody}
+              multiline
+              textAlignVertical="top"
+            />
+            <TouchableOpacity
+              onPress={handleVoiceToggle}
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                padding: 8,
+                borderRadius: 20,
+                backgroundColor: isListening ? '#e74c3c' : '#f0f0f0',
+              }}>
+              <Feather
+                name={isListening ? 'mic' : 'mic'}
+                size={scale(20)}
+                color={isListening ? '#fff' : '#888'}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {isListening && (
+            <Text style={{ fontSize: scale(12), color: '#e74c3c', marginTop: 8, textAlign: 'center' }}>
+              Listening... tap the mic to stop
+            </Text>
+          )}
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

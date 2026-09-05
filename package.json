@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@dev-amirzubair/react-native-voice": "^1.0.4",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/datetimepicker": "^9.1.0",
