@@ -1,7 +1,12 @@
 import React from 'react';
-import type { WidgetTaskHandlerProps } from 'react-native-android-widget';
+import type {
+  WidgetTaskHandlerProps,
+} from 'react-native-android-widget';
 
-import { MentalHealthWidget } from './MentalHealthWidget';
+import {
+  MentalHealthWidget,
+} from './MentalHealthWidget';
+
 import {
   getTodaysMood,
   saveMoodEntry,
@@ -14,18 +19,26 @@ export async function widgetTaskHandler(
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED': {
-      const todaysMood = await getTodaysMood();
+      const todaysMood =
+        await getTodaysMood();
 
       props.renderWidget(
         <MentalHealthWidget
-          selectedMood={todaysMood ?? undefined}
+          selectedMood={
+            todaysMood ??
+            undefined
+          }
         />,
       );
+
       break;
     }
 
     case 'WIDGET_CLICK': {
-      if (props.clickAction !== 'SELECT_MOOD') {
+      if (
+        props.clickAction !==
+        'SELECT_MOOD'
+      ) {
         break;
       }
 
@@ -53,6 +66,7 @@ export async function widgetTaskHandler(
       props.renderWidget(
         <MentalHealthWidget
           selectedMood={mood}
+          showConfirmation
         />,
       );
 

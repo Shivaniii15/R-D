@@ -8,12 +8,22 @@ import {
 
 interface MentalHealthWidgetProps {
   selectedMood?: number;
+  showConfirmation?: boolean;
 }
 
 export function MentalHealthWidget({
   selectedMood,
+  showConfirmation = false,
 }: MentalHealthWidgetProps): React.JSX.Element {
   const moods = [1, 2, 3, 4, 5];
+
+  let statusText = 'Tap a number to log your mood';
+
+  if (selectedMood !== undefined) {
+    statusText = showConfirmation
+      ? `✓ Mood logged: ${selectedMood}/5`
+      : `Latest mood: ${selectedMood}/5`;
+  }
 
   return (
     <FlexWidget
@@ -55,7 +65,8 @@ export function MentalHealthWidget({
         }}>
 
         {moods.map(mood => {
-          const isSelected = selectedMood === mood;
+          const isSelected =
+            selectedMood === mood;
 
           return (
             <TextWidget
@@ -65,7 +76,9 @@ export function MentalHealthWidget({
               clickActionData={{
                 mood,
               }}
-              accessibilityLabel={`Log mood ${mood} out of 5`}
+              accessibilityLabel={
+                `Log mood ${mood} out of 5`
+              }
               style={{
                 fontSize: 20,
                 color: isSelected
@@ -86,15 +99,14 @@ export function MentalHealthWidget({
       </FlexWidget>
 
       <TextWidget
-        text={
-          selectedMood !== undefined
-            ? `Mood saved: ${selectedMood}/5`
-            : 'Tap a number to log your mood'
-        }
+        text={statusText}
         style={{
           fontSize: 13,
           color: '#555555',
           marginTop: 14,
+          fontWeight: showConfirmation
+            ? '700'
+            : '400',
         }}
       />
 
