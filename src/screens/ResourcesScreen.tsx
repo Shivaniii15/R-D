@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import { resourceStyles as styles } from '../styles/resources.styles';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 type Category = 'International' | 'All Students' | 'Staff';
 
@@ -144,6 +145,7 @@ export default function ResourcesScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const [activeCategory, setActiveCategory] = useState<Category>('International');
   const categories: Category[] = ['International', 'All Students', 'Staff'];
+  const { scale } = useAccessibility();
 
   function handlePress(resource: Resource) {
     if (resource.url) {
@@ -156,9 +158,9 @@ export default function ResourcesScreen(): React.JSX.Element {
       <View style={styles.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
-            <Feather name="arrow-left" size={22} color="#111" />
+            <Feather name="arrow-left" size={scale(22)} color="#111" />
           </TouchableOpacity>
-          <Text style={styles.heading}>Resources</Text>
+          <Text style={[styles.heading, { fontSize: scale(24) }]}>Resources</Text>
         </View>
       </View>
 
@@ -175,6 +177,7 @@ export default function ResourcesScreen(): React.JSX.Element {
               style={[
                 styles.categoryText,
                 activeCategory === cat && styles.categoryTextActive,
+                { fontSize: scale(13) },
               ]}>
               {cat}
             </Text>
@@ -191,8 +194,8 @@ export default function ResourcesScreen(): React.JSX.Element {
             activeOpacity={resource.url ? 0.7 : 1}>
             <View style={[styles.cardIcon, { backgroundColor: resource.color }]} />
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{resource.title}</Text>
-              <Text style={styles.cardSubtitle}>{resource.subtitle}</Text>
+              <Text style={[styles.cardTitle, { fontSize: scale(15) }]}>{resource.title}</Text>
+              <Text style={[styles.cardSubtitle, { fontSize: scale(12) }]}>{resource.subtitle}</Text>
             </View>
           </TouchableOpacity>
         ))}

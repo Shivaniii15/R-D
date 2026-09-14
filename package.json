@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@dev-amirzubair/react-native-voice": "^1.0.4",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/datetimepicker": "^9.1.0",
@@ -20,7 +21,6 @@
     "@react-navigation/native-stack": "^7.17.6",
     "react": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-android-widget": "^0.22.0",
     "react-native-chart-kit": "^6.12.3",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.25.2",

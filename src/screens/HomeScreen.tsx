@@ -21,10 +21,13 @@ import {
   WeeklyAverage,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
-import { cancelMoodReminder, updateMoodReminder } from '../services/notification.service';
+import {
+  cancelMoodReminder,
+  updateMoodReminder,
+} from '../services/notification.service';
 import { HomeStackParamList } from '../navigation/HomeNavigator';
 import { homeStyles as styles } from '../styles/home.styles';
-import { refreshMentalHealthWidget } from '../widgets/widgetUpdate.service';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -36,7 +39,48 @@ const EMOJIS = [
   { emoji: '😄', value: 5, label: 'Great' },
 ];
 
+const AFFIRMATIONS = [
+  "It is okay to take things one step at a time.",
+  "You do not have to have everything figured out right now.",
+  "Rest is not a reward, it is a necessity.",
+  "You are allowed to feel whatever you are feeling today.",
+  "Small progress is still progress.",
+  "Being kind to yourself is not weakness, it is wisdom.",
+  "You have made it through hard days before.",
+  "It is okay to ask for help when you need it.",
+  "You do not have to be productive to have worth.",
+  "Taking care of yourself is not selfish.",
+  "Difficult feelings are temporary, even when they do not feel like it.",
+  "You are doing the best you can with what you have right now.",
+  "It is okay to set limits on what you can handle today.",
+  "Growth is not always visible, but it is still happening.",
+  "You deserve the same kindness you would give a friend.",
+  "Not every day has to be a good day for you to be okay.",
+  "Your feelings are valid even if others do not understand them.",
+  "Struggling does not mean failing.",
+  "You are more than your most stressful day.",
+  "It is okay to slow down.",
+  "Progress does not have to be perfect to count.",
+  "You are allowed to change your mind and your plans.",
+  "Asking for support is a sign of self-awareness, not weakness.",
+  "You have handled uncertainty before and you can handle it again.",
+  "Being a student or working hard is tough. Acknowledge that.",
+  "Your worth is not measured by your grades or productivity.",
+  "It is normal to feel overwhelmed sometimes.",
+  "You do not have to earn rest.",
+  "One bad day does not define your whole journey.",
+  "You are allowed to have needs.",
+];
+
+function getDailyAffirmation(): string {
+  const dayOfYear = Math.floor(
+    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+  );
+  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
+}
+
 type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'HomeMain'>;
+
 type RangeOption = 'Week' | 'Month' | '3 Months';
 
 function calcAverage(entries: MoodEntry[]): string {
@@ -59,6 +103,8 @@ export default function HomeScreen(): React.JSX.Element {
   const [weeklyAverages, setWeeklyAverages] = useState<WeeklyAverage[]>([]);
 
   const navigation = useNavigation<HomeNavigationProp>();
+  const { scale } = useAccessibility();
+  const todaysAffirmation = getDailyAffirmation();
 
   useFocusEffect(
     useCallback(() => {
@@ -110,11 +156,8 @@ export default function HomeScreen(): React.JSX.Element {
   async function handleSave(): Promise<void> {
     try {
       const today = new Date().toISOString().split('T')[0];
-
       await saveMoodEntry({ date: today, mood });
       setTodaysMood(mood);
-
-      await refreshMentalHealthWidget();
       await cancelMoodReminder();
 
       if (selectedRange === 'Week') {
@@ -136,24 +179,24 @@ export default function HomeScreen(): React.JSX.Element {
   const isWeek = selectedRange === 'Week';
 
   const chartLabels = isWeek
-    ? weekEntries.map(entry => {
-        const date = new Date(`${entry.date}T00:00:00`);
+    ? weekEntries.map(e => {
+        const date = new Date(`${e.date}T00:00:00`);
         return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
       })
-    : weeklyAverages.map(entry => entry.label);
+    : weeklyAverages.map(e => e.label);
 
   const chartData = isWeek
-    ? weekEntries.map(entry => (entry.mood === 0 ? 0.1 : entry.mood))
-    : weeklyAverages.map(entry => (entry.average === 0 ? 0.1 : entry.average));
+    ? weekEntries.map(e => (e.mood === 0 ? 0.1 : e.mood))
+    : weeklyAverages.map(e => (e.average === 0 ? 0.1 : e.average));
 
   const hasAnyData = isWeek
-    ? weekEntries.some(entry => entry.mood > 0)
-    : weeklyAverages.some(entry => entry.average > 0);
+    ? weekEntries.some(e => e.mood > 0)
+    : weeklyAverages.some(e => e.average > 0);
 
   const average = isWeek ? calcAverage(weekEntries) : calcAverageFromWeekly(weeklyAverages);
   const countLogged = isWeek
-    ? weekEntries.filter(entry => entry.mood > 0).length
-    : weeklyAverages.filter(entry => entry.average > 0).length;
+    ? weekEntries.filter(e => e.mood > 0).length
+    : weeklyAverages.filter(e => e.average > 0).length;
   const countLabel = isWeek ? 'Days Logged' : 'Weeks Logged';
 
   return (
@@ -176,35 +219,50 @@ export default function HomeScreen(): React.JSX.Element {
             borderWidth: 1,
             borderColor: '#FFE082',
           }}>
-          <Text style={{ fontSize: 20, marginRight: 10 }}>🆘</Text>
+          <Text style={{ fontSize: scale(20), marginRight: 10 }}>🆘</Text>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: '#111' }}>
+            <Text style={{ fontSize: scale(13), fontWeight: '700', color: '#111' }}>
               Need help now?
             </Text>
-            <Text style={{ fontSize: 12, color: '#555', marginTop: 2 }}>
+            <Text style={{ fontSize: scale(12), color: '#555', marginTop: 2 }}>
               Call or text 1737 - free NZ mental health support, available 24/7
             </Text>
           </View>
-          <Text style={{ fontSize: 12, color: '#888', marginLeft: 8 }}>Tap to call</Text>
+          <Text style={{ fontSize: scale(12), color: '#888', marginLeft: 8 }}>Tap to call</Text>
         </TouchableOpacity>
+
+        {/* Daily Affirmation */}
+        <View style={{
+          backgroundColor: '#F0F4FF',
+          marginHorizontal: 16,
+          marginTop: 10,
+          marginBottom: 4,
+          borderRadius: 12,
+          padding: 14,
+        }}>
+          <Text style={{ fontSize: scale(11), color: '#888', fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 }}>
+            Today's Reminder
+          </Text>
+          <Text style={{ fontSize: scale(14), color: '#333', lineHeight: 22 }}>
+            {todaysAffirmation}
+          </Text>
+        </View>
 
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.heading}>Mood logging.</Text>
-              <Text style={styles.subheading}>How are you feeling today?</Text>
+              <Text style={[styles.heading, { fontSize: scale(24) }]}>Mood logging.</Text>
+              <Text style={[styles.subheading, { fontSize: scale(14) }]}>How are you feeling today?</Text>
             </View>
-            <TouchableOpacity
-              style={styles.exitButton}
-              onPress={() => BackHandler.exitApp()}>
-              <Text style={styles.exitButtonText}>✕</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today's Mood</Text>
-          <Text style={styles.moodValue}>
+          <Text style={[styles.sectionTitle, { fontSize: scale(16) }]}>
+            Today&apos;s Mood
+          </Text>
+
+          <Text style={[styles.moodValue, { fontSize: scale(48) }]}>
             {alreadyLogged ? todaysMood : mood}/5
           </Text>
 
@@ -219,8 +277,8 @@ export default function HomeScreen(): React.JSX.Element {
                       mood === item.value && styles.emojiButtonSelected,
                     ]}
                     onPress={() => setMood(item.value)}>
-                    <Text style={styles.emojiText}>{item.emoji}</Text>
-                    <Text style={styles.emojiLabel}>{item.label}</Text>
+                    <Text style={[styles.emojiText, { fontSize: scale(28) }]}>{item.emoji}</Text>
+                    <Text style={[styles.emojiLabel, { fontSize: scale(10) }]}>{item.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -235,19 +293,22 @@ export default function HomeScreen(): React.JSX.Element {
                 maximumTrackTintColor="#e0e0e0"
                 thumbTintColor="#111"
               />
+
               <View style={styles.sliderRow}>
-                <Text style={styles.sliderLabel}>1</Text>
-                <Text style={styles.sliderLabel}>5</Text>
+                <Text style={[styles.sliderLabel, { fontSize: scale(12) }]}>1</Text>
+                <Text style={[styles.sliderLabel, { fontSize: scale(12) }]}>5</Text>
               </View>
             </>
           )}
         </View>
 
         {alreadyLogged ? (
-          <Text style={styles.savedText}>✓ Mood logged for today</Text>
+          <Text style={[styles.savedText, { fontSize: scale(13) }]}>
+            ✓ Mood logged for today
+          </Text>
         ) : (
           <TouchableOpacity style={styles.saveButton} activeOpacity={0.8} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Log Mood</Text>
+            <Text style={[styles.saveButtonText, { fontSize: scale(15) }]}>Log Mood</Text>
           </TouchableOpacity>
         )}
 
@@ -255,7 +316,7 @@ export default function HomeScreen(): React.JSX.Element {
           style={styles.historyButton}
           activeOpacity={0.8}
           onPress={() => navigation.navigate('MoodHistory')}>
-          <Text style={styles.historyButtonText}>View Mood History</Text>
+          <Text style={[styles.historyButtonText, { fontSize: scale(15) }]}>View Mood History</Text>
         </TouchableOpacity>
 
         <View style={styles.section}>
@@ -265,7 +326,7 @@ export default function HomeScreen(): React.JSX.Element {
                 key={r}
                 style={[styles.rangeButton, selectedRange === r && styles.rangeButtonSelected]}
                 onPress={() => handleRangeChange(r)}>
-                <Text style={[styles.rangeButtonText, selectedRange === r && styles.rangeButtonTextSelected]}>
+                <Text style={[styles.rangeButtonText, selectedRange === r && styles.rangeButtonTextSelected, { fontSize: scale(13) }]}>
                   {r}
                 </Text>
               </TouchableOpacity>
@@ -274,12 +335,12 @@ export default function HomeScreen(): React.JSX.Element {
 
           <View style={styles.statRow}>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>Average Mood</Text>
-              <Text style={styles.statValue}>{average}</Text>
+              <Text style={[styles.statLabel, { fontSize: scale(12) }]}>Average Mood</Text>
+              <Text style={[styles.statValue, { fontSize: scale(24) }]}>{average}</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statLabel}>{countLabel}</Text>
-              <Text style={styles.statValue}>{countLogged}</Text>
+              <Text style={[styles.statLabel, { fontSize: scale(12) }]}>{countLabel}</Text>
+              <Text style={[styles.statValue, { fontSize: scale(24) }]}>{countLogged}</Text>
             </View>
           </View>
 
@@ -307,7 +368,7 @@ export default function HomeScreen(): React.JSX.Element {
               />
             </View>
           ) : (
-            <Text style={styles.noDataText}>No mood data for this period yet.</Text>
+            <Text style={[styles.noDataText, { fontSize: scale(14) }]}>No mood data for this period yet.</Text>
           )}
         </View>
 

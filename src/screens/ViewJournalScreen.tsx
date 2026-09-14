@@ -15,6 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { updateJournal } from '../storage/journal.storage';
 import { JournalStackParamList } from '../navigation/JournalNavigator';
 import { journalStyles as styles } from '../styles/journal.styles';
+import { useAccessibility } from '../context/AccessibilityContext';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'ViewJournal'>;
 type RouteProps = RouteProp<JournalStackParamList, 'ViewJournal'>;
@@ -23,6 +24,7 @@ export default function ViewJournalScreen(): React.JSX.Element {
   const navigation = useNavigation<NavProp>();
   const { params } = useRoute<RouteProps>();
   const { journal } = params;
+  const { scale } = useAccessibility();
 
   const [title, setTitle] = useState(journal.title);
   const [body, setBody] = useState(journal.body);
@@ -44,17 +46,17 @@ export default function ViewJournalScreen(): React.JSX.Element {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.cancel}>Cancel</Text>
+          <Text style={[styles.cancel, { fontSize: scale(15) }]}>Cancel</Text>
         </TouchableOpacity>
-        <Text style={styles.heading}>Edit Journal</Text>
+        <Text style={[styles.heading, { fontSize: scale(20) }]}>Edit Journal</Text>
         <TouchableOpacity onPress={handleSave}>
-          <Text style={styles.saveText}>Save</Text>
+          <Text style={[styles.saveText, { fontSize: scale(15) }]}>Save</Text>
         </TouchableOpacity>
       </View>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.form}>
           <TextInput
-            style={styles.titleInput}
+            style={[styles.titleInput, { fontSize: scale(22) }]}
             placeholder="Title"
             placeholderTextColor="#bbb"
             value={title}
@@ -63,7 +65,7 @@ export default function ViewJournalScreen(): React.JSX.Element {
           />
           <View style={styles.divider} />
           <TextInput
-            style={styles.bodyInput}
+            style={[styles.bodyInput, { fontSize: scale(16) }]}
             placeholder="Write your thoughts..."
             placeholderTextColor="#bbb"
             value={body}
