@@ -1,0 +1,22 @@
+/**
+ * Returns a date in YYYY-MM-DD format
+ * using the device's LOCAL calendar date.
+ *
+ * Unlike toISOString(), this does not
+ * convert the date to UTC first.
+ */
+export function getLocalDateString(
+  date: Date = new Date(),
+): string {
+  const year = date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1,
+  ).padStart(2, '0');
+
+  const day = String(
+    date.getDate(),
+  ).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}

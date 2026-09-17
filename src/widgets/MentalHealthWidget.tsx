@@ -1,6 +1,7 @@
 'use no memo';
 
 import React from 'react';
+
 import {
   FlexWidget,
   TextWidget,
@@ -8,22 +9,12 @@ import {
 
 interface MentalHealthWidgetProps {
   selectedMood?: number;
-  showConfirmation?: boolean;
 }
 
 export function MentalHealthWidget({
   selectedMood,
-  showConfirmation = false,
 }: MentalHealthWidgetProps): React.JSX.Element {
   const moods = [1, 2, 3, 4, 5];
-
-  let statusText = 'Tap a number to log your mood';
-
-  if (selectedMood !== undefined) {
-    statusText = showConfirmation
-      ? `✓ Mood logged: ${selectedMood}/5`
-      : `Latest mood: ${selectedMood}/5`;
-  }
 
   return (
     <FlexWidget
@@ -37,6 +28,8 @@ export function MentalHealthWidget({
         justifyContent: 'center',
       }}>
 
+      {/* Widget title */}
+
       <TextWidget
         text="Mental Health"
         style={{
@@ -46,6 +39,8 @@ export function MentalHealthWidget({
         }}
       />
 
+      {/* Question */}
+
       <TextWidget
         text="How are you feeling today?"
         style={{
@@ -54,6 +49,8 @@ export function MentalHealthWidget({
           marginTop: 8,
         }}
       />
+
+      {/* Mood buttons */}
 
       <FlexWidget
         style={{
@@ -81,15 +78,22 @@ export function MentalHealthWidget({
               }
               style={{
                 fontSize: 20,
+
                 color: isSelected
                   ? '#FFFFFF'
                   : '#333333',
+
                 fontWeight: '700',
-                backgroundColor: isSelected
-                  ? '#333333'
-                  : '#F1F1F1',
+
+                backgroundColor:
+                  isSelected
+                    ? '#2E7D32'
+                    : '#F1F1F1',
+
                 borderRadius: 18,
+
                 paddingHorizontal: 13,
+
                 paddingVertical: 8,
               }}
             />
@@ -98,15 +102,18 @@ export function MentalHealthWidget({
 
       </FlexWidget>
 
+      {/* Status */}
+
       <TextWidget
-        text={statusText}
+        text={
+          selectedMood !== undefined
+            ? `Latest mood: ${selectedMood}/5`
+            : 'Tap a number to log your mood'
+        }
         style={{
           fontSize: 13,
           color: '#555555',
           marginTop: 14,
-          fontWeight: showConfirmation
-            ? '700'
-            : '400',
         }}
       />
 

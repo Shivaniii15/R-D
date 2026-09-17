@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type {
   WidgetTaskHandlerProps,
 } from 'react-native-android-widget';
@@ -12,10 +13,20 @@ import {
   saveMoodEntry,
 } from '../storage/mood.storage';
 
+import {
+  getLocalDateString,
+} from '../utils/date.utils';
+
 export async function widgetTaskHandler(
   props: WidgetTaskHandlerProps,
 ): Promise<void> {
   switch (props.widgetAction) {
+
+    /*
+     * When the widget is added,
+     * updated or resized, load the
+     * latest mood logged today.
+     */
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED': {
@@ -34,6 +45,9 @@ export async function widgetTaskHandler(
       break;
     }
 
+    /*
+     * Handle a mood button press.
+     */
     case 'WIDGET_CLICK': {
       if (
         props.clickAction !==
@@ -46,6 +60,10 @@ export async function widgetTaskHandler(
         props.clickActionData?.mood,
       );
 
+      /*
+       * Only accept mood values
+       * from 1 through 5.
+       */
       if (
         !Number.isInteger(mood) ||
         mood < 1 ||
@@ -54,19 +72,37 @@ export async function widgetTaskHandler(
         break;
       }
 
-      const today = new Date()
-        .toISOString()
-        .split('T')[0];
+      /*
+       * Use the Android device's
+       * LOCAL calendar date.
+       */
+      const today =
+        getLocalDateString();
 
+      /*
+       * Every tap creates another
+       * mood entry.
+       *
+       * Therefore:
+       *
+       * 4 -> 4 -> 4
+       *
+       * creates three separate logs.
+       */
       await saveMoodEntry({
         date: today,
         mood,
       });
 
+      /*
+       * Immediately update the widget.
+       *
+       * The most recently logged
+       * number becomes green.
+       */
       props.renderWidget(
         <MentalHealthWidget
           selectedMood={mood}
-          showConfirmation
         />,
       );
 

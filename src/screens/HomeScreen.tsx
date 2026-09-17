@@ -16,16 +16,24 @@ import {
   AppState,
 } from 'react-native';
 
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  SafeAreaView,
+} from 'react-native-safe-area-context';
+
 import Slider from '@react-native-community/slider';
-import { LineChart } from 'react-native-chart-kit';
+
+import {
+  LineChart,
+} from 'react-native-chart-kit';
 
 import {
   useFocusEffect,
   useNavigation,
 } from '@react-navigation/native';
 
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
 
 import {
   getTodaysMood,
@@ -35,18 +43,29 @@ import {
   WeeklyAverage,
 } from '../storage/mood.storage';
 
-import { MoodEntry } from '../types/mood.types';
+import {
+  MoodEntry,
+} from '../types/mood.types';
 
 import {
   cancelMoodReminder,
   updateMoodReminder,
 } from '../services/notification.service';
 
-import { HomeStackParamList } from '../navigation/HomeNavigator';
+import {
+  HomeStackParamList,
+} from '../navigation/HomeNavigator';
 
-import { homeStyles as styles } from '../styles/home.styles';
+import {
+  homeStyles as styles,
+} from '../styles/home.styles';
 
-const screenWidth = Dimensions.get('window').width;
+import {
+  getLocalDateString,
+} from '../utils/date.utils';
+
+const screenWidth =
+  Dimensions.get('window').width;
 
 const EMOJIS = [
   {
@@ -90,19 +109,24 @@ type RangeOption =
 function calcAverage(
   entries: MoodEntry[],
 ): string {
-  const logged = entries.filter(
-    entry => entry.mood > 0,
-  );
+  const logged =
+    entries.filter(
+      entry =>
+        entry.mood > 0,
+    );
 
-  if (logged.length === 0) {
+  if (
+    logged.length === 0
+  ) {
     return 'N/A';
   }
 
-  const total = logged.reduce(
-    (sum, entry) =>
-      sum + entry.mood,
-    0,
-  );
+  const total =
+    logged.reduce(
+      (sum, entry) =>
+        sum + entry.mood,
+      0,
+    );
 
   return (
     total / logged.length
@@ -112,19 +136,24 @@ function calcAverage(
 function calcAverageFromWeekly(
   entries: WeeklyAverage[],
 ): string {
-  const logged = entries.filter(
-    entry => entry.average > 0,
-  );
+  const logged =
+    entries.filter(
+      entry =>
+        entry.average > 0,
+    );
 
-  if (logged.length === 0) {
+  if (
+    logged.length === 0
+  ) {
     return 'N/A';
   }
 
-  const total = logged.reduce(
-    (sum, entry) =>
-      sum + entry.average,
-    0,
-  );
+  const total =
+    logged.reduce(
+      (sum, entry) =>
+        sum + entry.average,
+      0,
+    );
 
   return (
     total / logged.length
@@ -141,15 +170,18 @@ export default function HomeScreen():
   const [
     todaysMood,
     setTodaysMood,
-  ] = useState<number | null>(
-    null,
-  );
+  ] =
+    useState<number | null>(
+      null,
+    );
 
   const [
     selectedRange,
     setSelectedRange,
   ] =
-    useState<RangeOption>('Week');
+    useState<RangeOption>(
+      'Week',
+    );
 
   const [
     weekEntries,
@@ -161,30 +193,43 @@ export default function HomeScreen():
     weeklyAverages,
     setWeeklyAverages,
   ] =
-    useState<WeeklyAverage[]>([]);
+    useState<
+      WeeklyAverage[]
+    >([]);
 
   const [
     saveConfirmation,
     setSaveConfirmation,
-  ] = useState<string | null>(
-    null,
-  );
+  ] =
+    useState<
+      string | null
+    >(null);
 
   const confirmationTimer =
-    useRef<ReturnType<
-      typeof setTimeout
-    > | null>(null);
+    useRef<
+      ReturnType<
+        typeof setTimeout
+      > | null
+    >(null);
 
   const navigation =
-    useNavigation<HomeNavigationProp>();
+    useNavigation<
+      HomeNavigationProp
+    >();
 
+  /*
+   * Refresh the existing graph.
+   */
   async function refreshChartData():
     Promise<void> {
     if (
-      selectedRange === 'Week'
+      selectedRange ===
+      'Week'
     ) {
       const savedWeekEntries =
-        await getMoodsByDays(7);
+        await getMoodsByDays(
+          7,
+        );
 
       setWeekEntries(
         savedWeekEntries,
@@ -194,10 +239,13 @@ export default function HomeScreen():
     }
 
     if (
-      selectedRange === 'Month'
+      selectedRange ===
+      'Month'
     ) {
       const savedWeeklyAverages =
-        await getWeeklyAverages(4);
+        await getWeeklyAverages(
+          4,
+        );
 
       setWeeklyAverages(
         savedWeeklyAverages,
@@ -207,13 +255,19 @@ export default function HomeScreen():
     }
 
     const savedWeeklyAverages =
-      await getWeeklyAverages(12);
+      await getWeeklyAverages(
+        12,
+      );
 
     setWeeklyAverages(
       savedWeeklyAverages,
     );
   }
 
+  /*
+   * Reload today's latest mood
+   * and the graph data.
+   */
   async function refreshMoodData():
     Promise<void> {
     try {
@@ -225,7 +279,8 @@ export default function HomeScreen():
       );
 
       if (
-        savedTodaysMood !== null
+        savedTodaysMood !==
+        null
       ) {
         setMood(
           savedTodaysMood,
@@ -242,11 +297,8 @@ export default function HomeScreen():
   }
 
   /*
-   * Refresh whenever this screen
-   * becomes focused through navigation.
-   *
-   * For example:
-   * Mood History -> Back -> Home.
+   * Refresh whenever HomeScreen
+   * becomes focused.
    */
   useFocusEffect(
     useCallback(() => {
@@ -279,25 +331,17 @@ export default function HomeScreen():
         }
       };
 
-      // refreshMoodData depends on
-      // selectedRange.
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedRange]),
   );
 
   /*
-   * IMPORTANT FOR THE WIDGET:
+   * Refresh whenever the Android
+   * app returns to the foreground.
    *
-   * When a mood is logged through
-   * the Android widget while the app
-   * is in the background, HomeScreen's
-   * React state still contains the old
-   * values.
-   *
-   * When the app becomes active again,
-   * reload AsyncStorage so the latest
-   * widget mood and graph data appear
-   * immediately.
+   * This ensures mood entries logged
+   * from the home-screen widget are
+   * immediately shown in the app.
    */
   useEffect(() => {
     const subscription =
@@ -326,11 +370,12 @@ export default function HomeScreen():
       subscription.remove();
     };
 
-    // refreshMoodData uses the
-    // current selected range.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedRange]);
 
+  /*
+   * Change graph range.
+   */
   async function handleRangeChange(
     range: RangeOption,
   ): Promise<void> {
@@ -341,7 +386,9 @@ export default function HomeScreen():
         range === 'Week'
       ) {
         const savedWeekEntries =
-          await getMoodsByDays(7);
+          await getMoodsByDays(
+            7,
+          );
 
         setWeekEntries(
           savedWeekEntries,
@@ -354,7 +401,9 @@ export default function HomeScreen():
         range === 'Month'
       ) {
         const savedWeeklyAverages =
-          await getWeeklyAverages(4);
+          await getWeeklyAverages(
+            4,
+          );
 
         setWeeklyAverages(
           savedWeeklyAverages,
@@ -364,7 +413,9 @@ export default function HomeScreen():
       }
 
       const savedWeeklyAverages =
-        await getWeeklyAverages(12);
+        await getWeeklyAverages(
+          12,
+        );
 
       setWeeklyAverages(
         savedWeeklyAverages,
@@ -377,12 +428,20 @@ export default function HomeScreen():
     }
   }
 
+  /*
+   * Save a mood from the app.
+   */
   async function handleSave():
     Promise<void> {
     try {
-      const today = new Date()
-        .toISOString()
-        .split('T')[0];
+      /*
+       * IMPORTANT:
+       *
+       * This now uses the device's
+       * local date rather than UTC.
+       */
+      const today =
+        getLocalDateString();
 
       await saveMoodEntry({
         date: today,
@@ -427,84 +486,94 @@ export default function HomeScreen():
   const isWeek =
     selectedRange === 'Week';
 
-  const chartLabels = isWeek
-    ? weekEntries.map(
-        entry => {
-          const date = new Date(
-            `${entry.date}T00:00:00`,
-          );
+  const chartLabels =
+    isWeek
+      ? weekEntries.map(
+          entry => {
+            const date =
+              new Date(
+                `${entry.date}T00:00:00`,
+              );
 
-          return [
-            'Sun',
-            'Mon',
-            'Tue',
-            'Wed',
-            'Thu',
-            'Fri',
-            'Sat',
-          ][date.getDay()];
-        },
-      )
-    : weeklyAverages.map(
-        entry => entry.label,
-      );
+            return [
+              'Sun',
+              'Mon',
+              'Tue',
+              'Wed',
+              'Thu',
+              'Fri',
+              'Sat',
+            ][date.getDay()];
+          },
+        )
+      : weeklyAverages.map(
+          entry =>
+            entry.label,
+        );
 
-  const chartData = isWeek
-    ? weekEntries.map(
-        entry =>
-          entry.mood === 0
-            ? 0.1
-            : entry.mood,
-      )
-    : weeklyAverages.map(
-        entry =>
-          entry.average === 0
-            ? 0.1
-            : entry.average,
-      );
+  const chartData =
+    isWeek
+      ? weekEntries.map(
+          entry =>
+            entry.mood === 0
+              ? 0.1
+              : entry.mood,
+        )
+      : weeklyAverages.map(
+          entry =>
+            entry.average === 0
+              ? 0.1
+              : entry.average,
+        );
 
-  const hasAnyData = isWeek
-    ? weekEntries.some(
-        entry =>
-          entry.mood > 0,
-      )
-    : weeklyAverages.some(
-        entry =>
-          entry.average > 0,
-      );
+  const hasAnyData =
+    isWeek
+      ? weekEntries.some(
+          entry =>
+            entry.mood > 0,
+        )
+      : weeklyAverages.some(
+          entry =>
+            entry.average > 0,
+        );
 
-  const average = isWeek
-    ? calcAverage(
-        weekEntries,
-      )
-    : calcAverageFromWeekly(
-        weeklyAverages,
-      );
+  const average =
+    isWeek
+      ? calcAverage(
+          weekEntries,
+        )
+      : calcAverageFromWeekly(
+          weeklyAverages,
+        );
 
-  const countLogged = isWeek
-    ? weekEntries.filter(
-        entry =>
-          entry.mood > 0,
-      ).length
-    : weeklyAverages.filter(
-        entry =>
-          entry.average > 0,
-      ).length;
+  const countLogged =
+    isWeek
+      ? weekEntries.filter(
+          entry =>
+            entry.mood > 0,
+        ).length
+      : weeklyAverages.filter(
+          entry =>
+            entry.average > 0,
+        ).length;
 
-  const countLabel = isWeek
-    ? 'Days Logged'
-    : 'Weeks Logged';
+  const countLabel =
+    isWeek
+      ? 'Days Logged'
+      : 'Weeks Logged';
 
   return (
     <SafeAreaView
-      style={styles.container}>
+      style={
+        styles.container
+      }>
 
       <ScrollView
         showsVerticalScrollIndicator={
           false
         }>
 
-        {/* Crisis Support Banner */}
+        {/* Crisis Support */}
 
         <TouchableOpacity
           onPress={() =>
@@ -524,7 +593,8 @@ export default function HomeScreen():
             flexDirection: 'row',
             alignItems: 'center',
             borderWidth: 1,
-            borderColor: '#FFE082',
+            borderColor:
+              '#FFE082',
           }}>
 
           <Text
@@ -557,7 +627,8 @@ export default function HomeScreen():
               }}>
               Call or text 1737 -
               free NZ mental health
-              support, available 24/7
+              support, available
+              24/7
             </Text>
 
           </View>
@@ -576,7 +647,9 @@ export default function HomeScreen():
         {/* Header */}
 
         <View
-          style={styles.header}>
+          style={
+            styles.header
+          }>
 
           <View
             style={
@@ -623,10 +696,12 @@ export default function HomeScreen():
 
         </View>
 
-        {/* Mood Logging */}
+        {/* Mood logging */}
 
         <View
-          style={styles.section}>
+          style={
+            styles.section
+          }>
 
           <Text
             style={
@@ -655,6 +730,7 @@ export default function HomeScreen():
                   }
                   style={[
                     styles.emojiButton,
+
                     mood ===
                       item.value &&
                       styles.emojiButtonSelected,
@@ -690,7 +766,9 @@ export default function HomeScreen():
             maximumValue={5}
             step={1}
             value={mood}
-            onValueChange={setMood}
+            onValueChange={
+              setMood
+            }
             minimumTrackTintColor="#111"
             maximumTrackTintColor="#e0e0e0"
             thumbTintColor="#111"
@@ -717,7 +795,8 @@ export default function HomeScreen():
 
           </View>
 
-          {todaysMood !== null && (
+          {todaysMood !==
+            null && (
             <Text
               style={{
                 marginTop: 10,
@@ -742,14 +821,16 @@ export default function HomeScreen():
           </Text>
         )}
 
-        {/* Log another mood */}
+        {/* Log Mood */}
 
         <TouchableOpacity
           style={
             styles.saveButton
           }
           activeOpacity={0.8}
-          onPress={handleSave}>
+          onPress={
+            handleSave
+          }>
 
           <Text
             style={
@@ -782,10 +863,12 @@ export default function HomeScreen():
 
         </TouchableOpacity>
 
-        {/* Mood Graph */}
+        {/* Graph */}
 
         <View
-          style={styles.section}>
+          style={
+            styles.section
+          }>
 
           <View
             style={
@@ -804,6 +887,7 @@ export default function HomeScreen():
                   key={range}
                   style={[
                     styles.rangeButton,
+
                     selectedRange ===
                       range &&
                       styles.rangeButtonSelected,
@@ -817,6 +901,7 @@ export default function HomeScreen():
                   <Text
                     style={[
                       styles.rangeButtonText,
+
                       selectedRange ===
                         range &&
                         styles.rangeButtonTextSelected,
@@ -903,7 +988,8 @@ export default function HomeScreen():
                 }}
 
                 width={
-                  screenWidth - 40
+                  screenWidth -
+                  40
                 }
 
                 height={200}
@@ -960,8 +1046,8 @@ export default function HomeScreen():
               style={
                 styles.noDataText
               }>
-              No mood data for this
-              period yet.
+              No mood data for
+              this period yet.
             </Text>
           )}
 
