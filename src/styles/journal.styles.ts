@@ -172,21 +172,66 @@ export const journalStyles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#111',
+    flex: 1,
+    textAlign: 'center',
+  },
+  modalBack: {
+    fontSize: 14,
+    color: '#aaa',
+    fontWeight: '500',
+    width: 60,
   },
   modalClose: {
     fontSize: 18,
     color: '#aaa',
     fontWeight: '600',
     padding: 4,
+    width: 60,
+    textAlign: 'right',
   },
   modalSubtitle: {
     fontSize: 13,
     color: '#aaa',
     marginBottom: 16,
+    textAlign: 'center',
   },
   modalList: {
     flexGrow: 0,
   },
+  // Insight type cards
+  typeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fafafa',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+    marginBottom: 10,
+  },
+  typeEmoji: {
+    fontSize: 28,
+    marginRight: 14,
+  },
+  typeTextContainer: {
+    flex: 1,
+  },
+  typeLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111',
+    marginBottom: 2,
+  },
+  typeDescription: {
+    fontSize: 12,
+    color: '#aaa',
+  },
+  typeArrow: {
+    fontSize: 22,
+    color: '#bbb',
+    marginLeft: 8,
+  },
+  // Journal select cards
   modalCard: {
     backgroundColor: '#fafafa',
     borderRadius: 12,
@@ -211,6 +256,7 @@ export const journalStyles = StyleSheet.create({
     color: '#555',
     lineHeight: 18,
   },
+  // Loading
   modalLoading: {
     paddingVertical: 48,
     alignItems: 'center',
@@ -220,6 +266,7 @@ export const journalStyles = StyleSheet.create({
     color: '#aaa',
     marginTop: 12,
   },
+  // Result
   insightsText: {
     fontSize: 15,
     color: '#333',

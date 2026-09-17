@@ -16,17 +16,18 @@ import { getJournals, deleteJournal } from '../storage/journal.storage';
 import { Journal } from '../types/journal.types';
 import { JournalStackParamList } from '../navigation/JournalNavigator';
 import { journalStyles as styles } from '../styles/journal.styles';
-import { getJournalInsights } from '../services/gemini.service';
+import { getJournalInsights, InsightType, INSIGHT_TYPES } from '../services/gemini.service';
 import { useAccessibility } from '../context/AccessibilityContext';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'JournalList'>;
 
-type ModalStep = 'select' | 'loading' | 'result';
+type ModalStep = 'selectType' | 'selectJournal' | 'loading' | 'result';
 
 export default function JournalScreen(): React.JSX.Element {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [modalStep, setModalStep] = useState<ModalStep>('select');
+  const [modalStep, setModalStep] = useState<ModalStep>('selectType');
+  const [selectedType, setSelectedType] = useState<InsightType>('general');
   const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
   const [insights, setInsights] = useState('');
   const navigation = useNavigation<NavProp>();
@@ -52,17 +53,22 @@ export default function JournalScreen(): React.JSX.Element {
       Alert.alert('No Journals', 'Create a journal entry first to get AI insights.');
       return;
     }
-    setModalStep('select');
+    setModalStep('selectType');
     setSelectedJournal(null);
     setInsights('');
     setModalVisible(true);
+  }
+
+  function handleSelectType(type: InsightType) {
+    setSelectedType(type);
+    setModalStep('selectJournal');
   }
 
   async function handleSelectJournal(journal: Journal) {
     setSelectedJournal(journal);
     setModalStep('loading');
     try {
-      const result = await getJournalInsights(journal);
+      const result = await getJournalInsights(journal, selectedType);
       setInsights(result);
       setModalStep('result');
     } catch (error) {
@@ -73,10 +79,12 @@ export default function JournalScreen(): React.JSX.Element {
 
   function closeModal() {
     setModalVisible(false);
-    setModalStep('select');
+    setModalStep('selectType');
     setSelectedJournal(null);
     setInsights('');
   }
+
+  const selectedTypeInfo = INSIGHT_TYPES.find(t => t.type === selectedType);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -129,18 +137,46 @@ export default function JournalScreen(): React.JSX.Element {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
 
-            {/* Select Journal Step */}
-            {modalStep === 'select' && (
+            {/* Step 1 — Select Insight Type */}
+            {modalStep === 'selectType' && (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select a Journal</Text>
+                  <Text style={styles.modalTitle}>AI Insights</Text>
                   <TouchableOpacity onPress={closeModal}>
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>
-                  Choose a journal entry to get AI insights on.
-                </Text>
+                <Text style={styles.modalSubtitle}>What kind of insights would you like?</Text>
+                {INSIGHT_TYPES.map(item => (
+                  <TouchableOpacity
+                    key={item.type}
+                    style={styles.typeCard}
+                    onPress={() => handleSelectType(item.type)}
+                    activeOpacity={0.7}>
+                    <Text style={styles.typeEmoji}>{item.emoji}</Text>
+                    <View style={styles.typeTextContainer}>
+                      <Text style={styles.typeLabel}>{item.label}</Text>
+                      <Text style={styles.typeDescription}>{item.description}</Text>
+                    </View>
+                    <Text style={styles.typeArrow}>›</Text>
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
+
+            {/* Step 2 — Select Journal */}
+            {modalStep === 'selectJournal' && (
+              <>
+                <View style={styles.modalHeader}>
+                  <TouchableOpacity onPress={() => setModalStep('selectType')}>
+                    <Text style={styles.modalBack}>← Back</Text>
+                  </TouchableOpacity>
+                  <Text style={styles.modalTitle}>{selectedTypeInfo?.emoji} {selectedTypeInfo?.label}</Text>
+                  <TouchableOpacity onPress={closeModal}>
+                    <Text style={styles.modalClose}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.modalSubtitle}>Choose a journal entry to analyse.</Text>
                 <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
                   {journals.map(journal => (
                     <TouchableOpacity
@@ -157,7 +193,7 @@ export default function JournalScreen(): React.JSX.Element {
               </>
             )}
 
-            {/* Loading Step */}
+            {/* Step 3 — Loading */}
             {modalStep === 'loading' && (
               <View style={styles.modalLoading}>
                 <ActivityIndicator size="large" color="#111" />
@@ -167,25 +203,23 @@ export default function JournalScreen(): React.JSX.Element {
               </View>
             )}
 
-            {/* Result Step */}
+            {/* Step 4 — Result */}
             {modalStep === 'result' && (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>AI Insights</Text>
+                  <Text style={styles.modalTitle}>{selectedTypeInfo?.emoji} {selectedTypeInfo?.label}</Text>
                   <TouchableOpacity onPress={closeModal}>
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>
-                  Based on "{selectedJournal?.title}"
-                </Text>
+                <Text style={styles.modalSubtitle}>Based on "{selectedJournal?.title}"</Text>
                 <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
                   <Text style={styles.insightsText}>{insights}</Text>
                 </ScrollView>
                 <TouchableOpacity
                   style={styles.modalBackButton}
-                  onPress={() => setModalStep('select')}>
-                  <Text style={styles.modalBackButtonText}>← Try another journal</Text>
+                  onPress={() => setModalStep('selectType')}>
+                  <Text style={styles.modalBackButtonText}>← Try a different insight type</Text>
                 </TouchableOpacity>
               </>
             )}
