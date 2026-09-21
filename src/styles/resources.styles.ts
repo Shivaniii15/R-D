@@ -1,21 +1,23 @@
 import { StyleSheet } from 'react-native';
+import type { ThemeColors } from '../theme/ThemeContext';
 
-export const resourceStyles = StyleSheet.create({
+export function createResourceStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   heading: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
     textAlign: 'center',
   },
   categoryRow: {
@@ -31,7 +33,7 @@ export const resourceStyles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   categoryButtonActive: {
-    backgroundColor: '#111',
+    backgroundColor: colors.accent,
   },
   categoryText: {
     fontSize: 13,
@@ -39,7 +41,7 @@ export const resourceStyles = StyleSheet.create({
     fontWeight: '500',
   },
   categoryTextActive: {
-    color: '#fff',
+    color: colors.accentText,
   },
   listContainer: {
     paddingHorizontal: 20,
@@ -51,7 +53,7 @@ export const resourceStyles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: colors.border,
     marginBottom: 10,
   },
   cardIcon: {
@@ -66,11 +68,12 @@ export const resourceStyles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111',
+    color: colors.text,
   },
   cardSubtitle: {
     fontSize: 12,
     color: '#aaa',
     marginTop: 3,
   },
-});
+  });
+}

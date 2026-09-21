@@ -1,9 +1,11 @@
 import { StyleSheet } from 'react-native';
+import type { ThemeColors } from '../theme/ThemeContext';
 
-export const journalStyles = StyleSheet.create({
+export function createJournalStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -12,21 +14,21 @@ export const journalStyles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   heading: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
   },
   newButton: {
-    backgroundColor: '#111',
+    backgroundColor: colors.accent,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   newButtonText: {
-    color: '#fff',
+    color: colors.accentText,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -38,7 +40,7 @@ export const journalStyles = StyleSheet.create({
   saveText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111',
+    color: colors.text,
     width: 60,
     textAlign: 'right',
   },
@@ -56,11 +58,11 @@ export const journalStyles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    backgroundColor: '#fafafa',
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: colors.border,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
@@ -72,7 +74,7 @@ export const journalStyles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111',
+    color: colors.text,
     marginBottom: 4,
   },
   cardDate: {
@@ -106,29 +108,30 @@ export const journalStyles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.border,
     marginVertical: 12,
   },
   bodyInput: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textMuted,
     lineHeight: 24,
     minHeight: 300,
   },
   backText: {
     fontSize: 15,
-    color: '#111',
+    color: colors.text,
     fontWeight: '500',
   },
   viewTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
     marginBottom: 6,
   },
   viewBody: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textMuted,
     lineHeight: 26,
   },
-});
+  });
+}
