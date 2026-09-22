@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -18,6 +19,7 @@ import { journalStyles as styles } from '../styles/journal.styles';
 import Feather from 'react-native-vector-icons/Feather';
 import { useAccessibility } from '../context/AccessibilityContext';
 import Voice from '@dev-amirzubair/react-native-voice';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'NewJournal'>;
 
@@ -48,6 +50,7 @@ export default function NewJournalScreen(): React.JSX.Element {
   const [body, setBody] = useState('');
   const [prompt, setPrompt] = useState(getRandomPrompt());
   const [isListening, setIsListening] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const navigation = useNavigation<NavProp>();
   const { scale } = useAccessibility();
 
@@ -82,6 +85,7 @@ export default function NewJournalScreen(): React.JSX.Element {
       title: title.trim(),
       body: body.trim(),
       createdAt: new Date().toISOString(),
+      imageUri: imageUri ?? undefined,
     });
     navigation.goBack();
   }
@@ -103,6 +107,36 @@ export default function NewJournalScreen(): React.JSX.Element {
       console.log('Voice error:', e);
       setIsListening(false);
     }
+  }
+
+  function handleImageAttachment() {
+    Alert.alert(
+      'Add Image',
+      'Choose how you want to add an image',
+      [
+        {
+          text: 'Take Photo',
+          onPress: () => {
+            launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
+              if (response.assets && response.assets[0]?.uri) {
+                setImageUri(response.assets[0].uri);
+              }
+            });
+          },
+        },
+        {
+          text: 'Choose from Gallery',
+          onPress: () => {
+            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
+              if (response.assets && response.assets[0]?.uri) {
+                setImageUri(response.assets[0].uri);
+              }
+            });
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+    );
   }
 
   return (
@@ -173,7 +207,7 @@ export default function NewJournalScreen(): React.JSX.Element {
                 backgroundColor: isListening ? '#e74c3c' : '#f0f0f0',
               }}>
               <Feather
-                name={isListening ? 'mic' : 'mic'}
+                name="mic"
                 size={scale(20)}
                 color={isListening ? '#fff' : '#888'}
               />
@@ -184,6 +218,47 @@ export default function NewJournalScreen(): React.JSX.Element {
             <Text style={{ fontSize: scale(12), color: '#e74c3c', marginTop: 8, textAlign: 'center' }}>
               Listening... tap the mic to stop
             </Text>
+          )}
+
+          {/* Image Attachment */}
+          <TouchableOpacity
+            onPress={handleImageAttachment}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 16,
+              padding: 12,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: '#e0e0e0',
+              borderStyle: 'dashed',
+            }}>
+            <Feather name="image" size={scale(18)} color="#888" />
+            <Text style={{ fontSize: scale(14), color: '#888', marginLeft: 8 }}>
+              {imageUri ? 'Change image' : 'Add image'}
+            </Text>
+          </TouchableOpacity>
+
+          {imageUri && (
+            <View style={{ marginTop: 12, position: 'relative' }}>
+              <Image
+                source={{ uri: imageUri }}
+                style={{ width: '100%', height: 200, borderRadius: 12 }}
+                resizeMode="cover"
+              />
+              <TouchableOpacity
+                onPress={() => setImageUri(null)}
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  borderRadius: 12,
+                  padding: 4,
+                }}>
+                <Feather name="x" size={scale(16)} color="#fff" />
+              </TouchableOpacity>
+            </View>
           )}
 
         </ScrollView>
