@@ -1,16 +1,18 @@
 import { StyleSheet } from 'react-native';
+import type { ThemeColors } from '../theme/ThemeContext';
 
-export const homeStyles = StyleSheet.create({
+export function createHomeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   headerRow: {
     flexDirection: 'row',
@@ -20,11 +22,11 @@ export const homeStyles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
   },
   subheading: {
     fontSize: 14,
-    color: '#aaa',
+    color: colors.textSubtle,
     marginTop: 4,
   },
   exitButton: {
@@ -32,7 +34,7 @@ export const homeStyles = StyleSheet.create({
   },
   exitButtonText: {
     fontSize: 18,
-    color: '#aaa',
+    color: colors.textSubtle,
     fontWeight: '600',
   },
   emojiRow: {
@@ -49,15 +51,15 @@ export const homeStyles = StyleSheet.create({
     borderColor: 'transparent',
   },
   emojiButtonSelected: {
-    borderColor: '#111',
-    backgroundColor: '#f5f5f5',
+    borderColor: colors.text,
+    backgroundColor: colors.surfaceMuted,
   },
   emojiText: {
     fontSize: 28,
   },
   emojiLabel: {
     fontSize: 10,
-    color: '#aaa',
+    color: colors.textSubtle,
     marginTop: 4,
   },
   section: {
@@ -67,13 +69,13 @@ export const homeStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111',
+    color: colors.text,
     marginBottom: 16,
   },
   moodValue: {
     fontSize: 48,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -84,10 +86,10 @@ export const homeStyles = StyleSheet.create({
   },
   sliderLabel: {
     fontSize: 12,
-    color: '#aaa',
+    color: colors.textSubtle,
   },
   saveButton: {
-    backgroundColor: '#111',
+    backgroundColor: colors.accent,
     marginHorizontal: 20,
     marginTop: 20,
     paddingVertical: 14,
@@ -98,14 +100,14 @@ export const homeStyles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
   },
   saveButtonText: {
-    color: '#fff',
+    color: colors.accentText,
     fontWeight: '600',
     fontSize: 15,
   },
   savedText: {
     textAlign: 'center',
     marginTop: 12,
-    color: '#aaa',
+    color: colors.textSubtle,
     fontSize: 13,
   },
   historyButton: {
@@ -113,12 +115,12 @@ export const homeStyles = StyleSheet.create({
     marginTop: 12,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: '#111',
+    borderColor: colors.text,
     borderRadius: 12,
     alignItems: 'center',
   },
   historyButtonText: {
-    color: '#111',
+    color: colors.text,
     fontSize: 15,
     fontWeight: '600',
   },
@@ -129,7 +131,7 @@ export const homeStyles = StyleSheet.create({
   },
   noDataText: {
     textAlign: 'center',
-    color: '#aaa',
+    color: colors.textSubtle,
     fontSize: 14,
     paddingVertical: 20,
   },
@@ -144,19 +146,19 @@ export const homeStyles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: colors.border,
   },
   rangeButtonSelected: {
-    backgroundColor: '#111',
-    borderColor: '#111',
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
   rangeButtonText: {
     fontSize: 13,
-    color: '#aaa',
+    color: colors.textSubtle,
     fontWeight: '500',
   },
   rangeButtonTextSelected: {
-    color: '#fff',
+    color: colors.accentText,
   },
   // Stats
   statRow: {
@@ -166,20 +168,21 @@ export const homeStyles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    backgroundColor: '#fafafa',
+    backgroundColor: colors.surfaceMuted,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: colors.border,
   },
   statLabel: {
     fontSize: 12,
-    color: '#aaa',
+    color: colors.textSubtle,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
   },
-});
+  });
+}

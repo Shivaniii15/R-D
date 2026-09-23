@@ -14,6 +14,7 @@ import { navigationStyles } from '../styles/Navigation.styles';
 import HomeNavigator from './HomeNavigator';
 import { handleNavigationReady, navigationRef } from './navigation.service';
 import type { RootStackParamList } from './navigation.types';
+import { useTheme } from '../theme/ThemeContext';
 
 type TabName = 'Home' | 'Journal' | 'Settings' | 'Wellness';
 
@@ -26,7 +27,8 @@ const Tab = createBottomTabNavigator();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
-  const color = focused ? '#111' : '#bbb';
+  const { colors } = useTheme();
+  const color = focused ? colors.text : colors.tabInactive;
   const iconMap: Record<TabName, string> = {
     Home: 'home',
     Journal: 'book',
@@ -37,6 +39,8 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
 }
 
 function MainTabs(): React.JSX.Element {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }): BottomTabNavigationOptions => ({
@@ -45,11 +49,11 @@ function MainTabs(): React.JSX.Element {
           <TabIcon name={route.name as TabName} focused={focused} />
         ),
         tabBarLabel: ({ focused }) => (
-          <Text style={[navigationStyles.tabLabel, { color: focused ? '#111' : '#bbb' }]}>
+          <Text style={[navigationStyles.tabLabel, { color: focused ? colors.text : colors.tabInactive }]}>
             {route.name}
           </Text>
         ),
-        tabBarStyle: navigationStyles.tabBar,
+        tabBarStyle: [navigationStyles.tabBar, { backgroundColor: colors.background, borderTopColor: colors.border }],
         tabBarItemStyle: navigationStyles.tabBarItem,
       })}>
       <Tab.Screen name="Home" component={HomeNavigator} />
