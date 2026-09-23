@@ -240,6 +240,31 @@ export const journalStyles = StyleSheet.create({
     borderColor: '#f0f0f0',
     marginBottom: 10,
   },
+  modalCardSelected: {
+    borderColor: '#111',
+    backgroundColor: '#f5f5f5',
+  },
+  modalCardRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  modalCardCheckbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+    backgroundColor: '#fff',
+  },
+  modalCardCheckmark: {
+    fontSize: 13,
+    color: '#111',
+    fontWeight: '700',
+  },
   modalCardTitle: {
     fontSize: 15,
     fontWeight: '600',
@@ -255,6 +280,22 @@ export const journalStyles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
     lineHeight: 18,
+  },
+  // Analyse button
+  analyseButton: {
+    backgroundColor: '#111',
+    marginTop: 14,
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  analyseButtonDisabled: {
+    backgroundColor: '#e0e0e0',
+  },
+  analyseButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
   },
   // Loading
   modalLoading: {
