@@ -20,15 +20,16 @@ import { getJournalInsights, InsightType, INSIGHT_TYPES } from '../services/gemi
 import { useAccessibility } from '../context/AccessibilityContext';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'JournalList'>;
-
 type ModalStep = 'selectType' | 'selectJournal' | 'loading' | 'result';
+
+const MAX_JOURNALS = 3;
 
 export default function JournalScreen(): React.JSX.Element {
   const [journals, setJournals] = useState<Journal[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStep, setModalStep] = useState<ModalStep>('selectType');
   const [selectedType, setSelectedType] = useState<InsightType>('general');
-  const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
+  const [selectedJournals, setSelectedJournals] = useState<Journal[]>([]);
   const [insights, setInsights] = useState('');
   const navigation = useNavigation<NavProp>();
   const { scale } = useAccessibility();
@@ -54,21 +55,39 @@ export default function JournalScreen(): React.JSX.Element {
       return;
     }
     setModalStep('selectType');
-    setSelectedJournal(null);
+    setSelectedJournals([]);
     setInsights('');
     setModalVisible(true);
   }
 
   function handleSelectType(type: InsightType) {
     setSelectedType(type);
+    setSelectedJournals([]);
     setModalStep('selectJournal');
   }
 
-  async function handleSelectJournal(journal: Journal) {
-    setSelectedJournal(journal);
+  function toggleJournalSelection(journal: Journal) {
+    setSelectedJournals(prev => {
+      const isSelected = prev.some(j => j.id === journal.id);
+      if (isSelected) {
+        return prev.filter(j => j.id !== journal.id);
+      }
+      if (prev.length >= MAX_JOURNALS) {
+        Alert.alert('Limit reached', `You can select up to ${MAX_JOURNALS} journals at a time.`);
+        return prev;
+      }
+      return [...prev, journal];
+    });
+  }
+
+  async function handleAnalyse() {
+    if (selectedJournals.length === 0) {
+      Alert.alert('No journals selected', 'Please select at least one journal.');
+      return;
+    }
     setModalStep('loading');
     try {
-      const result = await getJournalInsights(journal, selectedType);
+      const result = await getJournalInsights(selectedJournals, selectedType);
       setInsights(result);
       setModalStep('result');
     } catch (error) {
@@ -80,7 +99,7 @@ export default function JournalScreen(): React.JSX.Element {
   function closeModal() {
     setModalVisible(false);
     setModalStep('selectType');
-    setSelectedJournal(null);
+    setSelectedJournals([]);
     setInsights('');
   }
 
@@ -123,12 +142,10 @@ export default function JournalScreen(): React.JSX.Element {
         />
       )}
 
-      {/* AI Insights Button */}
       <TouchableOpacity style={styles.aiButton} onPress={openAIModal} activeOpacity={0.8}>
         <Text style={styles.aiButtonText}>✦ AI Insights</Text>
       </TouchableOpacity>
 
-      {/* AI Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -164,7 +181,7 @@ export default function JournalScreen(): React.JSX.Element {
               </>
             )}
 
-            {/* Step 2 — Select Journal */}
+            {/* Step 2 — Select Journals */}
             {modalStep === 'selectJournal' && (
               <>
                 <View style={styles.modalHeader}>
@@ -176,20 +193,41 @@ export default function JournalScreen(): React.JSX.Element {
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>Choose a journal entry to analyse.</Text>
+                <Text style={styles.modalSubtitle}>
+                  Select up to {MAX_JOURNALS} journals ({selectedJournals.length} selected)
+                </Text>
                 <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
-                  {journals.map(journal => (
-                    <TouchableOpacity
-                      key={journal.id}
-                      style={styles.modalCard}
-                      onPress={() => handleSelectJournal(journal)}
-                      activeOpacity={0.7}>
-                      <Text style={styles.modalCardTitle}>{journal.title}</Text>
-                      <Text style={styles.modalCardDate}>{formatDate(journal.createdAt)}</Text>
-                      <Text style={styles.modalCardBody} numberOfLines={2}>{journal.body}</Text>
-                    </TouchableOpacity>
-                  ))}
+                  {journals.map(journal => {
+                    const isSelected = selectedJournals.some(j => j.id === journal.id);
+                    return (
+                      <TouchableOpacity
+                        key={journal.id}
+                        style={[styles.modalCard, isSelected && styles.modalCardSelected]}
+                        onPress={() => toggleJournalSelection(journal)}
+                        activeOpacity={0.7}>
+                        <View style={styles.modalCardRow}>
+                          <View style={styles.modalCardCheckbox}>
+                            {isSelected && <Text style={styles.modalCardCheckmark}>✓</Text>}
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.modalCardTitle}>{journal.title}</Text>
+                            <Text style={styles.modalCardDate}>{formatDate(journal.createdAt)}</Text>
+                            <Text style={styles.modalCardBody} numberOfLines={2}>{journal.body}</Text>
+                          </View>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </ScrollView>
+                <TouchableOpacity
+                  style={[styles.analyseButton, selectedJournals.length === 0 && styles.analyseButtonDisabled]}
+                  onPress={handleAnalyse}
+                  activeOpacity={0.8}
+                  disabled={selectedJournals.length === 0}>
+                  <Text style={styles.analyseButtonText}>
+                    Analyse {selectedJournals.length > 0 ? `${selectedJournals.length} ` : ''}Journal{selectedJournals.length !== 1 ? 's' : ''}
+                  </Text>
+                </TouchableOpacity>
               </>
             )}
 
@@ -198,7 +236,7 @@ export default function JournalScreen(): React.JSX.Element {
               <View style={styles.modalLoading}>
                 <ActivityIndicator size="large" color="#111" />
                 <Text style={styles.modalLoadingText}>
-                  Analysing "{selectedJournal?.title}"...
+                  Analysing {selectedJournals.length} journal{selectedJournals.length !== 1 ? 's' : ''}...
                 </Text>
               </View>
             )}
@@ -212,7 +250,9 @@ export default function JournalScreen(): React.JSX.Element {
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>Based on "{selectedJournal?.title}"</Text>
+                <Text style={styles.modalSubtitle}>
+                  Based on {selectedJournals.length} journal{selectedJournals.length !== 1 ? 's' : ''}
+                </Text>
                 <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
                   <Text style={styles.insightsText}>{insights}</Text>
                 </ScrollView>
