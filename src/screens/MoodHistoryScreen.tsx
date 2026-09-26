@@ -11,9 +11,12 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getMoodEntries } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
-import { moodHistoryStyles as styles } from '../styles/moodHistory.styles';
+import { createMoodHistoryStyles } from '../styles/moodHistory.styles';
+import { useTheme } from '../theme/ThemeContext';
 
 export default function MoodHistoryScreen(): React.JSX.Element {
+  const { colors } = useTheme();
+  const styles = createMoodHistoryStyles(colors);
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
   const navigation = useNavigation();

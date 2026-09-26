@@ -1,16 +1,18 @@
 import { StyleSheet } from 'react-native';
+import type { ThemeColors } from '../theme/ThemeContext';
 
-export const moodHistoryStyles = StyleSheet.create({
+export function createMoodHistoryStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 18,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.border,
   },
   backButton: {
     alignSelf: 'flex-start',
@@ -18,12 +20,12 @@ export const moodHistoryStyles = StyleSheet.create({
     marginBottom: 8,
   },
   backButtonText: {
-    color: '#111',
+    color: colors.text,
     fontSize: 15,
     fontWeight: '600',
   },
   heading: {
-    color: '#111',
+    color: colors.text,
     fontSize: 24,
     fontWeight: '700',
   },
@@ -41,13 +43,13 @@ export const moodHistoryStyles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     borderRadius: 12,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: colors.surfaceMuted,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   entryDate: {
-    color: '#111',
+    color: colors.text,
     fontSize: 15,
     fontWeight: '600',
     marginBottom: 5,
@@ -153,4 +155,5 @@ export const moodHistoryStyles = StyleSheet.create({
     fontWeight: '600',
   },
 
-});
+  });
+}
