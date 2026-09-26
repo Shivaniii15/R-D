@@ -9,10 +9,14 @@ import {
 
 interface MentalHealthWidgetProps {
   selectedMood?: number;
+  message?: string;
+  isCooldown?: boolean;
 }
 
 export function MentalHealthWidget({
   selectedMood,
+  message,
+  isCooldown = false,
 }: MentalHealthWidgetProps): React.JSX.Element {
   const moods = [1, 2, 3, 4, 5];
 
@@ -28,8 +32,6 @@ export function MentalHealthWidget({
         justifyContent: 'center',
       }}>
 
-      {/* Widget title */}
-
       <TextWidget
         text="Mental Health"
         style={{
@@ -39,25 +41,27 @@ export function MentalHealthWidget({
         }}
       />
 
-      {/* Question */}
-
       <TextWidget
-        text="How are you feeling today?"
+        text={
+          message ??
+          'How are you feeling today?'
+        }
         style={{
           fontSize: 14,
-          color: '#666666',
-          marginTop: 8,
+          color:
+            message !== undefined
+              ? '#2E7D32'
+              : '#666666',
+          marginTop: 7,
         }}
       />
-
-      {/* Mood buttons */}
 
       <FlexWidget
         style={{
           width: 'match_parent',
           flexDirection: 'row',
           justifyContent: 'space-between',
-          marginTop: 18,
+          marginTop: 16,
           paddingHorizontal: 4,
         }}>
 
@@ -65,35 +69,33 @@ export function MentalHealthWidget({
           const isSelected =
             selectedMood === mood;
 
+          const isDisabled =
+            isCooldown && !isSelected;
+
           return (
             <TextWidget
               key={mood}
               text={String(mood)}
               clickAction="SELECT_MOOD"
-              clickActionData={{
-                mood,
-              }}
+              clickActionData={{ mood }}
               accessibilityLabel={
                 `Log mood ${mood} out of 5`
               }
               style={{
                 fontSize: 20,
-
                 color: isSelected
                   ? '#FFFFFF'
-                  : '#333333',
-
+                  : isDisabled
+                    ? '#BDBDBD'
+                    : '#333333',
                 fontWeight: '700',
-
-                backgroundColor:
-                  isSelected
-                    ? '#2E7D32'
+                backgroundColor: isSelected
+                  ? '#2E7D32'
+                  : isDisabled
+                    ? '#F5F5F5'
                     : '#F1F1F1',
-
                 borderRadius: 18,
-
                 paddingHorizontal: 13,
-
                 paddingVertical: 8,
               }}
             />
@@ -102,17 +104,19 @@ export function MentalHealthWidget({
 
       </FlexWidget>
 
-      {/* Status */}
-
       <TextWidget
         text={
           selectedMood !== undefined
-            ? `Latest mood: ${selectedMood}/5`
-            : 'Tap a number to log your mood'
+            ? `Latest mood  ·  ${selectedMood} / 5`
+            : 'No mood logged yet'
         }
         style={{
-          fontSize: 13,
-          color: '#555555',
+          fontSize: 14,
+          fontWeight: '700',
+          color:
+            selectedMood !== undefined
+              ? '#2E7D32'
+              : '#777777',
           marginTop: 14,
         }}
       />

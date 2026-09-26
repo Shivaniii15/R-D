@@ -10,7 +10,9 @@ import {
 
 import {
   getTodaysMood,
+  isWidgetMoodOnCooldown,
   saveMoodEntry,
+  setWidgetLastLogTime,
 } from '../storage/mood.storage';
 
 import {
@@ -21,17 +23,14 @@ export async function widgetTaskHandler(
   props: WidgetTaskHandlerProps,
 ): Promise<void> {
   switch (props.widgetAction) {
-
-    /*
-     * When the widget is added,
-     * updated or resized, load the
-     * latest mood logged today.
-     */
     case 'WIDGET_ADDED':
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED': {
       const todaysMood =
         await getTodaysMood();
+
+      const onCooldown =
+        await isWidgetMoodOnCooldown();
 
       props.renderWidget(
         <MentalHealthWidget
@@ -39,15 +38,13 @@ export async function widgetTaskHandler(
             todaysMood ??
             undefined
           }
+          isCooldown={onCooldown}
         />,
       );
 
       break;
     }
 
-    /*
-     * Handle a mood button press.
-     */
     case 'WIDGET_CLICK': {
       if (
         props.clickAction !==
@@ -60,10 +57,6 @@ export async function widgetTaskHandler(
         props.clickActionData?.mood,
       );
 
-      /*
-       * Only accept mood values
-       * from 1 through 5.
-       */
       if (
         !Number.isInteger(mood) ||
         mood < 1 ||
@@ -72,37 +65,61 @@ export async function widgetTaskHandler(
         break;
       }
 
+      const onCooldown =
+        await isWidgetMoodOnCooldown();
+
       /*
-       * Use the Android device's
-       * LOCAL calendar date.
+       * If the widget is still within the
+       * 30-second cooldown, do not save
+       * another mood entry.
+       */
+      if (onCooldown) {
+        const todaysMood =
+          await getTodaysMood();
+
+        props.renderWidget(
+          <MentalHealthWidget
+            selectedMood={
+              todaysMood ??
+              undefined
+            }
+            message="Please wait before logging another mood"
+            isCooldown={true}
+          />,
+        );
+
+        break;
+      }
+
+      /*
+       * Cooldown has finished, so the
+       * new mood can be logged.
        */
       const today =
         getLocalDateString();
 
-      /*
-       * Every tap creates another
-       * mood entry.
-       *
-       * Therefore:
-       *
-       * 4 -> 4 -> 4
-       *
-       * creates three separate logs.
-       */
       await saveMoodEntry({
         date: today,
         mood,
       });
 
       /*
+       * Start a new 30-second cooldown.
+       */
+      await setWidgetLastLogTime();
+
+      /*
        * Immediately update the widget.
        *
-       * The most recently logged
-       * number becomes green.
+       * The selected mood stays green,
+       * while the other mood choices
+       * appear greyed out.
        */
       props.renderWidget(
         <MentalHealthWidget
           selectedMood={mood}
+          message="Mood logged successfully"
+          isCooldown={true}
         />,
       );
 
