@@ -117,7 +117,7 @@ export default function NewJournalScreen(): React.JSX.Element {
         {
           text: 'Take Photo',
           onPress: () => {
-            launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
+            launchCamera({ mediaType: 'photo', quality: 0.8, saveToPhotos: true }, response => {
               if (response.assets && response.assets[0]?.uri) {
                 setImageUri(response.assets[0].uri);
               }
