@@ -19,7 +19,7 @@ import { journalStyles as styles } from '../styles/journal.styles';
 import Feather from 'react-native-vector-icons/Feather';
 import { useAccessibility } from '../context/AccessibilityContext';
 import Voice from '@dev-amirzubair/react-native-voice';
-import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'NewJournal'>;
 
@@ -110,33 +110,11 @@ export default function NewJournalScreen(): React.JSX.Element {
   }
 
   function handleImageAttachment() {
-    Alert.alert(
-      'Add Image',
-      'Choose how you want to add an image',
-      [
-        {
-          text: 'Take Photo',
-          onPress: () => {
-            launchCamera({ mediaType: 'photo', quality: 0.8, saveToPhotos: true }, response => {
-              if (response.assets && response.assets[0]?.uri) {
-                setImageUri(response.assets[0].uri);
-              }
-            });
-          },
-        },
-        {
-          text: 'Choose from Gallery',
-          onPress: () => {
-            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
-              if (response.assets && response.assets[0]?.uri) {
-                setImageUri(response.assets[0].uri);
-              }
-            });
-          },
-        },
-        { text: 'Cancel', style: 'cancel' },
-      ],
-    );
+    launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
+      if (response.assets && response.assets[0]?.uri) {
+        setImageUri(response.assets[0].uri);
+      }
+    });
   }
 
   return (
