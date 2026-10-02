@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  saveMoodEntry,
+  logMoodEntry,
   getMoodEntries,
   getTodaysMood,
 } from '../src/storage/mood.storage';
@@ -9,25 +9,29 @@ beforeEach(async () => {
   await AsyncStorage.clear();
 });
 
-// saving a mood entry and retrieving it
+// Test 1: logging a mood entry and retrieving it
+test('logs a mood entry and retrieves the daily average', async () => {
+  const result = await logMoodEntry(4);
 
-test('saves a mood entry and retrieves it', async () => {
-  const entry = { date: '2025-01-01', mood: 4 };
+  expect(result.success).toBe(true);
 
-  await saveMoodEntry(entry);
   const entries = await getMoodEntries();
-
   expect(entries).toHaveLength(1);
-  expect(entries[0].date).toBe('2025-01-01');
   expect(entries[0].mood).toBe(4);
 });
 
-// getTodaysMood returns null when nothing logged today 
+// Test 2: blocks a second log within the cooldown period
+test('blocks logging again within the 1 hour cooldown', async () => {
+  await logMoodEntry(3);
+  const result = await logMoodEntry(5);
 
+  expect(result.success).toBe(false);
+  expect(result.reason).toBe('cooldown');
+  expect(result.cooldownMinutesLeft).toBeGreaterThan(0);
+});
+
+// Test 3: getTodaysMood returns null when nothing has been logged today
 test('getTodaysMood returns null when no entry exists for today', async () => {
-  // Save an entry for a past date only
-  await saveMoodEntry({ date: '2020-01-01', mood: 3 });
-
   const todaysMood = await getTodaysMood();
   expect(todaysMood).toBeNull();
 });

@@ -14,10 +14,10 @@ import { LineChart } from 'react-native-chart-kit';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-  getTodaysMood,
-  saveMoodEntry,
+  logMoodEntry,
   getMoodsByDays,
   getWeeklyAverages,
+  getTodayStatus,
   WeeklyAverage,
 } from '../storage/mood.storage';
 import { MoodEntry } from '../types/mood.types';
@@ -40,7 +40,6 @@ const EMOJIS = [
 ];
 
 type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'HomeMain'>;
-
 type RangeOption = 'Week' | 'Month' | '3 Months';
 
 function calcAverage(entries: MoodEntry[]): string {
@@ -58,8 +57,12 @@ function calcAverageFromWeekly(entries: WeeklyAverage[]): string {
 export default function HomeScreen(): React.JSX.Element {
   const { isDarkMode, colors } = useTheme();
   const styles = createHomeStyles(colors);
+
   const [mood, setMood] = useState(3);
-  const [todaysMood, setTodaysMood] = useState<number | null>(null);
+  const [logsCount, setLogsCount] = useState(0);
+  const [canLog, setCanLog] = useState(true);
+  const [cooldownMinutesLeft, setCooldownMinutesLeft] = useState(0);
+  const [latestMood, setLatestMood] = useState<number | null>(null);
   const [selectedRange, setSelectedRange] = useState<RangeOption>('Week');
   const [weekEntries, setWeekEntries] = useState<MoodEntry[]>([]);
   const [weeklyAverages, setWeeklyAverages] = useState<WeeklyAverage[]>([]);
@@ -68,20 +71,20 @@ export default function HomeScreen(): React.JSX.Element {
 
   useFocusEffect(
     useCallback(() => {
-      async function loadMoodData(): Promise<void> {
+      async function loadData(): Promise<void> {
         try {
-          const savedTodaysMood = await getTodaysMood();
-          setTodaysMood(savedTodaysMood);
+          const status = await getTodayStatus();
+          setLogsCount(status.logsCount);
+          setCanLog(status.canLog);
+          setCooldownMinutesLeft(status.cooldownMinutesLeft);
+          setLatestMood(status.latestMood);
 
           if (selectedRange === 'Week') {
-            const savedWeekEntries = await getMoodsByDays(7);
-            setWeekEntries(savedWeekEntries);
+            setWeekEntries(await getMoodsByDays(7));
           } else if (selectedRange === 'Month') {
-            const savedWeeklyAverages = await getWeeklyAverages(4);
-            setWeeklyAverages(savedWeeklyAverages);
+            setWeeklyAverages(await getWeeklyAverages(4));
           } else {
-            const savedWeeklyAverages = await getWeeklyAverages(12);
-            setWeeklyAverages(savedWeeklyAverages);
+            setWeeklyAverages(await getWeeklyAverages(12));
           }
 
           await updateMoodReminder();
@@ -89,8 +92,7 @@ export default function HomeScreen(): React.JSX.Element {
           console.error('Failed to load mood data:', error);
         }
       }
-
-      loadMoodData();
+      loadData();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedRange]),
   );
@@ -99,14 +101,11 @@ export default function HomeScreen(): React.JSX.Element {
     setSelectedRange(range);
     try {
       if (range === 'Week') {
-        const savedWeekEntries = await getMoodsByDays(7);
-        setWeekEntries(savedWeekEntries);
+        setWeekEntries(await getMoodsByDays(7));
       } else if (range === 'Month') {
-        const savedWeeklyAverages = await getWeeklyAverages(4);
-        setWeeklyAverages(savedWeeklyAverages);
+        setWeeklyAverages(await getWeeklyAverages(4));
       } else {
-        const savedWeeklyAverages = await getWeeklyAverages(12);
-        setWeeklyAverages(savedWeeklyAverages);
+        setWeeklyAverages(await getWeeklyAverages(12));
       }
     } catch (error) {
       console.error('Failed to load range data:', error);
@@ -115,33 +114,32 @@ export default function HomeScreen(): React.JSX.Element {
 
   async function handleSave(): Promise<void> {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const result = await logMoodEntry(mood);
 
-      await saveMoodEntry({
-        date: today,
-        mood,
-      });
-
-      setTodaysMood(mood);
+      if (!result.success) {
+        return;
+      }
 
       await cancelMoodReminder();
 
+      const status = await getTodayStatus();
+      setLogsCount(status.logsCount);
+      setCanLog(status.canLog);
+      setCooldownMinutesLeft(status.cooldownMinutesLeft);
+      setLatestMood(status.latestMood);
+
       if (selectedRange === 'Week') {
-        const updatedWeekEntries = await getMoodsByDays(7);
-        setWeekEntries(updatedWeekEntries);
+        setWeekEntries(await getMoodsByDays(7));
       } else if (selectedRange === 'Month') {
-        const updatedWeeklyAverages = await getWeeklyAverages(4);
-        setWeeklyAverages(updatedWeeklyAverages);
+        setWeeklyAverages(await getWeeklyAverages(4));
       } else {
-        const updatedWeeklyAverages = await getWeeklyAverages(12);
-        setWeeklyAverages(updatedWeeklyAverages);
+        setWeeklyAverages(await getWeeklyAverages(12));
       }
     } catch (error) {
       console.error('Failed to save mood:', error);
     }
   }
 
-  const alreadyLogged = todaysMood !== null;
   const isWeek = selectedRange === 'Week';
 
   const chartLabels = isWeek
@@ -164,6 +162,13 @@ export default function HomeScreen(): React.JSX.Element {
     ? weekEntries.filter(e => e.mood > 0).length
     : weeklyAverages.filter(e => e.average > 0).length;
   const countLabel = isWeek ? 'Days Logged' : 'Weeks Logged';
+
+  function getMoodStatusText(): string {
+    if (logsCount === 0) return '';
+    if (logsCount >= 3) return '✓ 3/3 moods logged today';
+    if (!canLog) return `Next log available in ${cooldownMinutesLeft} min`;
+    return `${logsCount}/3 logged today — log again now`;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -212,15 +217,12 @@ export default function HomeScreen(): React.JSX.Element {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>
-            Today&apos;s Mood
-          </Text>
-
+          <Text style={styles.sectionTitle}>Today's Mood</Text>
           <Text style={styles.moodValue}>
-            {alreadyLogged ? todaysMood : mood}/5
+            {latestMood !== null ? latestMood : mood}/5
           </Text>
 
-          {!alreadyLogged && (
+          {canLog && (
             <>
               <View style={styles.emojiRow}>
                 {EMOJIS.map(item => (
@@ -256,14 +258,14 @@ export default function HomeScreen(): React.JSX.Element {
           )}
         </View>
 
-        {alreadyLogged ? (
-          <Text style={styles.savedText}>
-            ✓ Mood logged for today
-          </Text>
-        ) : (
+        {canLog ? (
           <TouchableOpacity style={styles.saveButton} activeOpacity={0.8} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Log Mood</Text>
+            <Text style={styles.saveButtonText}>
+              {logsCount === 0 ? 'Log Mood' : `Log Again (${logsCount}/3)`}
+            </Text>
           </TouchableOpacity>
+        ) : (
+          <Text style={styles.savedText}>{getMoodStatusText()}</Text>
         )}
 
         <TouchableOpacity
