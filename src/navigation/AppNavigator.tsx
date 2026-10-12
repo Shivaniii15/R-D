@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -6,6 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
 import DisclaimerNotice from '../components/DisclaimerNotice';
+import FirstLaunchTutorial from '../components/FirstLaunchTutorial';
 import JournalNavigator from './JournalNavigator';
 import WellnessNavigator from './WellnessNavigator';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -65,9 +66,12 @@ function MainTabs(): React.JSX.Element {
 }
 
 export default function AppNavigator(): React.JSX.Element {
+  const [disclaimerDismissed, setDisclaimerDismissed] = useState(false);
+
   return (
     <>
-      <DisclaimerNotice />
+      <DisclaimerNotice onDismiss={() => setDisclaimerDismissed(true)} />
+      <FirstLaunchTutorial start={disclaimerDismissed} />
       <NavigationContainer ref={navigationRef} onReady={handleNavigationReady}>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           <RootStack.Screen name="MainTabs" component={MainTabs} />
