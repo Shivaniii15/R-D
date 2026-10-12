@@ -30,6 +30,7 @@ import {
   openMotivationalAlarmPermissionSettings,
   updateMotivationalReminder,
 } from '../services/motivationalNotification.service';
+import { ThemeColors, useTheme } from '../theme/ThemeContext';
 
 const INACTIVITY_OPTIONS = [
   1,
@@ -39,6 +40,14 @@ const INACTIVITY_OPTIONS = [
 ];
 
 export default function MotivationalReminderSettings(): React.JSX.Element {
+  const { colors } = useTheme();
+
+  const toggleTrackOff = '#D9E8DD';
+  const toggleTrackOn = '#587F69';
+  const toggleThumbOff = '#FFFDF9';
+  const toggleThumbOn = '#587F69';
+  const styles = createMotivationalReminderStyles(colors);
+
   const [
     remindersEnabled,
     setLocalRemindersEnabled,
@@ -375,13 +384,13 @@ export default function MotivationalReminderSettings(): React.JSX.Element {
           }
           disabled={isUpdating}
           trackColor={{
-            false: '#d5d5d5',
-            true: '#777777',
+            false: toggleTrackOff,
+            true: toggleTrackOn,
           }}
           thumbColor={
             remindersEnabled
-              ? '#111111'
-              : '#f4f4f4'
+              ? toggleThumbOn
+              : toggleThumbOff
           }
         />
       </View>
@@ -478,121 +487,123 @@ function formatDayCount(
     : `${days} days`;
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 30,
-  },
+function createMotivationalReminderStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    loadingContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 30,
+    },
 
-  sectionHeading: {
-    color: '#111111',
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: 10,
-    marginBottom: 12,
-  },
+    sectionHeading: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '700',
+      marginTop: 10,
+      marginBottom: 12,
+    },
 
-  settingCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    borderRadius: 16,
-    padding: 18,
-  },
+    settingCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 16,
+      padding: 18,
+    },
 
-  settingTextContainer: {
-    flex: 1,
-    paddingRight: 16,
-  },
+    settingTextContainer: {
+      flex: 1,
+      paddingRight: 16,
+    },
 
-  settingTitle: {
-    color: '#111111',
-    fontSize: 17,
-    fontWeight: '600',
-  },
+    settingTitle: {
+      color: colors.text,
+      fontSize: 17,
+      fontWeight: '600',
+    },
 
-  settingDescription: {
-    color: '#666666',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-  },
+    settingDescription: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+      marginTop: 6,
+    },
 
-  statusText: {
-    color: '#888888',
-    fontSize: 13,
-    marginTop: 10,
-  },
+    statusText: {
+      color: colors.textSubtle,
+      fontSize: 13,
+      marginTop: 10,
+    },
 
-  preferenceCard: {
-    backgroundColor: '#f7f7f7',
-    borderRadius: 16,
-    padding: 18,
-    marginTop: 18,
-    marginBottom: 18,
-  },
+    preferenceCard: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 16,
+      padding: 18,
+      marginTop: 18,
+      marginBottom: 18,
+    },
 
-  optionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-  },
+    optionContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+    },
 
-  optionButton: {
-    width: '22%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#e1e1e1',
-    borderRadius: 12,
-    paddingVertical: 12,
-  },
+    optionButton: {
+      width: '22%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingVertical: 12,
+    },
 
-  selectedOptionButton: {
-    backgroundColor: '#111111',
-    borderColor: '#111111',
-  },
+    selectedOptionButton: {
+      backgroundColor: colors.accent,
+      borderColor: colors.accent,
+    },
 
-  optionText: {
-    color: '#111111',
-    fontSize: 18,
-    fontWeight: '700',
-  },
+    optionText: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+    },
 
-  optionLabel: {
-    color: '#777777',
-    fontSize: 12,
-    marginTop: 2,
-  },
+    optionLabel: {
+      color: colors.textSubtle,
+      fontSize: 12,
+      marginTop: 2,
+    },
 
-  selectedOptionText: {
-    color: '#ffffff',
-  },
+    selectedOptionText: {
+      color: colors.accentText,
+    },
 
-  currentPreferenceText: {
-    color: '#777777',
-    fontSize: 13,
-    marginTop: 18,
-  },
+    currentPreferenceText: {
+      color: colors.textSubtle,
+      fontSize: 13,
+      marginTop: 18,
+    },
 
-  saveButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#111111',
-    borderRadius: 12,
-    paddingVertical: 14,
-    marginTop: 16,
-  },
+    saveButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      paddingVertical: 14,
+      marginTop: 16,
+    },
 
-  disabledButton: {
-    opacity: 0.5,
-  },
+    disabledButton: {
+      opacity: 0.5,
+    },
 
-  saveButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-});
+    saveButtonText: {
+      color: colors.accentText,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+  });
+}

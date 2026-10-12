@@ -30,7 +30,7 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
     fontWeight: '700',
   },
   subheading: {
-    color: '#aaa',
+    color: colors.textSubtle,
     fontSize: 14,
     marginTop: 4,
   },
@@ -55,7 +55,7 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
     marginBottom: 5,
   },
   entryDescription: {
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 13,
   },
   moodBadge: {
@@ -63,11 +63,11 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
     paddingVertical: 9,
     paddingHorizontal: 10,
     borderRadius: 20,
-    backgroundColor: '#111',
+    backgroundColor: colors.accent,
     alignItems: 'center',
   },
   moodBadgeText: {
-    color: '#fff',
+    color: colors.accentText,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -76,7 +76,9 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
     marginTop: 20,
     padding: 18,
     borderRadius: 12,
-    backgroundColor: '#111',
+    backgroundColor: colors.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   detailsHeader: {
     flexDirection: 'row',
@@ -84,38 +86,38 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
     alignItems: 'center',
   },
   detailsTitle: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
   closeText: {
-    color: '#bbb',
+    color: colors.textSubtle,
     fontSize: 13,
   },
   detailsDate: {
-    color: '#ddd',
+    color: colors.textMuted,
     fontSize: 14,
     marginTop: 16,
   },
   detailsMood: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 38,
     fontWeight: '700',
     marginTop: 8,
   },
   detailsDescription: {
-    color: '#ccc',
+    color: colors.textMuted,
     fontSize: 14,
     marginTop: 2,
   },
   notesLabel: {
-    color: '#fff',
+    color: colors.text,
     fontSize: 14,
     fontWeight: '600',
     marginTop: 18,
   },
   notesText: {
-    color: '#bbb',
+    color: colors.textSubtle,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 5,
@@ -127,12 +129,12 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
     paddingHorizontal: 36,
   },
   emptyTitle: {
-    color: '#111',
+    color: colors.text,
     fontSize: 18,
     fontWeight: '700',
   },
   emptyText: {
-    color: '#aaa',
+    color: colors.textSubtle,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',

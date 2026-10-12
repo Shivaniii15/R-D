@@ -35,8 +35,16 @@ import {
   openActivityAlarmPermissionSettings,
   updateActivityReminder,
 } from '../services/activityNotification.service';
+import { ThemeColors, useTheme } from '../theme/ThemeContext';
 
 export default function ActivityReminderSettings(): React.JSX.Element {
+  const { colors } = useTheme();
+
+  const toggleTrackOff = '#D9E8DD';
+  const toggleTrackOn = '#587F69';
+  const toggleThumbOff = '#FFFDF9';
+  const toggleThumbOn = '#587F69';
+  const styles = createActivityReminderStyles(colors);
   const [enabled, setEnabled] =
     useState(false);
 
@@ -286,13 +294,13 @@ export default function ActivityReminderSettings(): React.JSX.Element {
           onValueChange={handleToggle}
           disabled={isUpdating}
           trackColor={{
-            false: '#d5d5d5',
-            true: '#777777',
+            false: toggleTrackOff,
+            true: toggleTrackOn,
           }}
           thumbColor={
             enabled
-              ? '#111111'
-              : '#f4f4f4'
+              ? toggleThumbOn
+              : toggleThumbOff
           }
         />
       </View>
@@ -372,90 +380,94 @@ function formatTime(
   });
 }
 
-const styles = StyleSheet.create({
-  loading: {
-    paddingVertical: 30,
-  },
+function createActivityReminderStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    loading: {
+      paddingVertical: 30,
+    },
 
-  sectionHeading: {
-    color: '#111111',
-    fontSize: 20,
-    fontWeight: '700',
-    marginTop: 10,
-    marginBottom: 12,
-  },
+    sectionHeading: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: '700',
+      marginTop: 10,
+      marginBottom: 12,
+    },
 
-  settingCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    borderRadius: 16,
-    padding: 18,
-  },
+    settingCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 16,
+      padding: 18,
+    },
 
-  settingTextContainer: {
-    flex: 1,
-    paddingRight: 16,
-  },
+    settingTextContainer: {
+      flex: 1,
+      paddingRight: 16,
+    },
 
-  settingTitle: {
-    color: '#111111',
-    fontSize: 17,
-    fontWeight: '600',
-  },
+    settingTitle: {
+      color: colors.text,
+      fontSize: 17,
+      fontWeight: '600',
+    },
 
-  description: {
-    color: '#666666',
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 6,
-  },
+    description: {
+      color: colors.textMuted,
+      fontSize: 14,
+      lineHeight: 20,
+      marginTop: 6,
+    },
 
-  status: {
-    color: '#888888',
-    fontSize: 13,
-    marginTop: 10,
-  },
+    status: {
+      color: colors.textSubtle,
+      fontSize: 13,
+      marginTop: 10,
+    },
 
-  timeCard: {
-    backgroundColor: '#f7f7f7',
-    borderRadius: 16,
-    padding: 18,
-    marginTop: 18,
-    marginBottom: 18,
-  },
+    timeCard: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 16,
+      padding: 18,
+      marginTop: 18,
+      marginBottom: 18,
+    },
 
-  timeButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 18,
-  },
+    timeButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingVertical: 16,
+      marginTop: 18,
+    },
 
-  timeButtonText: {
-    color: '#111111',
-    fontSize: 24,
-    fontWeight: '700',
-  },
+    timeButtonText: {
+      color: colors.text,
+      fontSize: 24,
+      fontWeight: '700',
+    },
 
-  saveButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#111111',
-    borderRadius: 12,
-    paddingVertical: 14,
-    marginTop: 16,
-  },
+    saveButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      paddingVertical: 14,
+      marginTop: 16,
+    },
 
-  disabledButton: {
-    opacity: 0.5,
-  },
+    disabledButton: {
+      opacity: 0.5,
+    },
 
-  saveButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-});
+    saveButtonText: {
+      color: colors.accentText,
+      fontSize: 15,
+      fontWeight: '600',
+    },
+  });
+}

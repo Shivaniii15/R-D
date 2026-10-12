@@ -34,13 +34,13 @@ export function createJournalStyles(colors: ThemeColors) {
   },
   cancel: {
     fontSize: 15,
-    color: '#aaa',
+    color: colors.textSubtle,
     width: 60,
   },
   saveText: {
     fontSize: 15,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.accent,
     width: 60,
     textAlign: 'right',
   },
@@ -50,7 +50,7 @@ export function createJournalStyles(colors: ThemeColors) {
     justifyContent: 'center',
   },
   emptyText: {
-    color: '#aaa',
+    color: colors.textSubtle,
     fontSize: 15,
   },
   list: {
@@ -79,12 +79,12 @@ export function createJournalStyles(colors: ThemeColors) {
   },
   cardDate: {
     fontSize: 12,
-    color: '#aaa',
+    color: colors.textSubtle,
     marginBottom: 6,
   },
   cardBody: {
     fontSize: 14,
-    color: '#555',
+    color: colors.textMuted,
     lineHeight: 20,
   },
   deleteButton: {
@@ -103,7 +103,7 @@ export function createJournalStyles(colors: ThemeColors) {
   titleInput: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#111',
+    color: colors.text,
     paddingVertical: 8,
   },
   divider: {
