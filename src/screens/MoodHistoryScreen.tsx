@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   FlatList,
   Text,
@@ -16,19 +16,26 @@ import { useTheme } from '../theme/ThemeContext';
 
 export default function MoodHistoryScreen(): React.JSX.Element {
   const { colors } = useTheme();
-  const styles = createMoodHistoryStyles(colors);
+  const styles = useMemo(() => createMoodHistoryStyles(colors), [colors]);
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<MoodEntry | null>(null);
   const navigation = useNavigation();
 
   useFocusEffect(
     useCallback(() => {
+      let active = true;
+
       getMoodEntries().then(savedEntries => {
+        if (!active) return;
         const sortedEntries = [...savedEntries].sort((a, b) =>
           b.date.localeCompare(a.date),
         );
         setEntries(sortedEntries);
       });
+
+      return () => {
+        active = false;
+      };
     }, []),
   );
 
@@ -49,7 +56,7 @@ export default function MoodHistoryScreen(): React.JSX.Element {
     return 'Excellent';
   }
 
-  async function handleClearAll() {
+  function handleClearAll() {
     Alert.alert(
       'Clear All History',
       'This will permanently delete all your mood entries. Are you sure?',
@@ -59,9 +66,16 @@ export default function MoodHistoryScreen(): React.JSX.Element {
           text: 'Clear All',
           style: 'destructive',
           onPress: async () => {
-            await AsyncStorage.removeItem('mood_entries');
-            setEntries([]);
+            try {
+              await Promise.all([
+                AsyncStorage.removeItem('mood_entries'),
+                AsyncStorage.removeItem('mood_logs')
+              ]);
+            } catch (e) {
+              console.warn('Failed to clear mood history', e);
+            }
             setSelectedEntry(null);
+            setEntries([]);
           },
         },
       ],

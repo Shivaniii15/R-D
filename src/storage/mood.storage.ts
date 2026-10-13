@@ -5,7 +5,7 @@ const LOGS_KEY = 'mood_logs';
 const ENTRIES_KEY = 'mood_entries';
 
 const MAX_LOGS_PER_DAY = 3;
-const COOLDOWN_MINUTES = 60;
+const COOLDOWN_MINUTES = 1;
 
 // ─── Raw logs (multiple per day) ─────────────────────────────────────────────
 

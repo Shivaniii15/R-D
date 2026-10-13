@@ -70,32 +70,44 @@ export default function HomeScreen(): React.JSX.Element {
   const navigation = useNavigation<HomeNavigationProp>();
 
   useFocusEffect(
-    useCallback(() => {
-      async function loadData(): Promise<void> {
-        try {
-          const status = await getTodayStatus();
-          setLogsCount(status.logsCount);
-          setCanLog(status.canLog);
-          setCooldownMinutesLeft(status.cooldownMinutesLeft);
-          setLatestMood(status.latestMood);
+  useCallback(() => {
+    async function loadData(): Promise<void> {
+      try {
+        const status = await getTodayStatus();
+        setLogsCount(status.logsCount);
+        setCanLog(status.canLog);
+        setCooldownMinutesLeft(status.cooldownMinutesLeft);
+        setLatestMood(status.latestMood);
 
-          if (selectedRange === 'Week') {
-            setWeekEntries(await getMoodsByDays(7));
-          } else if (selectedRange === 'Month') {
-            setWeeklyAverages(await getWeeklyAverages(4));
-          } else {
-            setWeeklyAverages(await getWeeklyAverages(12));
-          }
-
-          await updateMoodReminder();
-        } catch (error) {
-          console.error('Failed to load mood data:', error);
+        if (selectedRange === 'Week') {
+          setWeekEntries(await getMoodsByDays(7));
+        } else if (selectedRange === 'Month') {
+          setWeeklyAverages(await getWeeklyAverages(4));
+        } else {
+          setWeeklyAverages(await getWeeklyAverages(12));
         }
+
+        await updateMoodReminder();
+      } catch (error) {
+        console.error('Failed to load mood data:', error);
       }
-      loadData();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedRange]),
-  );
+    }
+    loadData();
+
+    const interval = setInterval(async () => {
+      const status = await getTodayStatus();
+      setCanLog(status.canLog);
+      setCooldownMinutesLeft(status.cooldownMinutesLeft);
+      setLogsCount(status.logsCount);
+      setLatestMood(status.latestMood);
+      if (status.canLog) {
+        setMood(3);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [selectedRange]),
+);
 
   async function handleRangeChange(range: RangeOption): Promise<void> {
     setSelectedRange(range);
@@ -219,7 +231,7 @@ export default function HomeScreen(): React.JSX.Element {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Today's Mood</Text>
           <Text style={styles.moodValue}>
-            {latestMood !== null ? latestMood : mood}/5
+            {canLog ? mood : latestMood}/5
           </Text>
 
           {canLog && (
