@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
+import { useTheme } from '../theme/ThemeContext';
+import type { ThemeColors } from '../theme/ThemeContext';
 
-export default function DisclaimerNotice(): React.JSX.Element {
+export default function DisclaimerNotice({
+  onDismiss,
+}: {
+  onDismiss?: () => void;
+}): React.JSX.Element {
   const [visible, setVisible] = useState(true);
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <Modal transparent visible={visible} animationType="fade">
@@ -23,7 +31,10 @@ export default function DisclaimerNotice(): React.JSX.Element {
 
             <TouchableOpacity
               style={[styles.button, styles.understandButton]}
-              onPress={() => setVisible(false)}
+              onPress={() => {
+                setVisible(false);
+                onDismiss?.();
+              }}
             >
               <Text style={styles.buttonText}>I Understand</Text>
             </TouchableOpacity>
@@ -36,7 +47,8 @@ export default function DisclaimerNotice(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -45,20 +57,22 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.surface,
     padding: 24,
-    borderRadius: 12,
+    borderRadius: 20,
     width: '100%',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#111',
+    color: colors.text,
     marginBottom: 12,
   },
   body: {
     fontSize: 14,
-    color: '#444',
+    color: colors.textMuted,
     lineHeight: 20,
     marginBottom: 24,
   },
@@ -77,22 +91,23 @@ const styles = StyleSheet.create({
   },
 
   understandButton: {
-    backgroundColor: '#111',
+    backgroundColor: colors.accent,
   },
 
   exitButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: colors.surfaceMuted,
   },
 
   buttonText: {
-    color: '#fff',
+    color: colors.accentText,
     fontWeight: '600',
     fontSize: 15,
   },
 
   exitButtonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontWeight: '600',
     fontSize: 15,
   },
-});
+  });
+}

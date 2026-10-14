@@ -14,6 +14,8 @@ import {
 
 import Feather from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../theme/ThemeContext';
+import type { ThemeColors } from '../theme/ThemeContext';
 
 interface ActivitySuggestion {
   title: string;
@@ -48,6 +50,8 @@ const suggestions: ActivitySuggestion[] = [
 
 export default function ActivitySuggestionScreen(): React.JSX.Element {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const initialIndex = useMemo(
     () =>
@@ -80,7 +84,7 @@ export default function ActivitySuggestionScreen(): React.JSX.Element {
           <Feather
             name="arrow-left"
             size={20}
-            color="#111111"
+            color={colors.text}
           />
 
           <Text style={styles.backText}>
@@ -102,7 +106,7 @@ export default function ActivitySuggestionScreen(): React.JSX.Element {
             <Feather
               name={suggestion.icon}
               size={32}
-              color="#ffffff"
+              color={colors.accentText}
             />
           </View>
 
@@ -125,7 +129,7 @@ export default function ActivitySuggestionScreen(): React.JSX.Element {
           <Feather
             name="refresh-cw"
             size={18}
-            color="#ffffff"
+            color={colors.accentText}
           />
 
           <Text style={styles.anotherButtonText}>
@@ -142,109 +146,111 @@ export default function ActivitySuggestionScreen(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
-  },
+    content: {
+      flexGrow: 1,
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 40,
+    },
 
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingVertical: 8,
-    marginBottom: 18,
-  },
+    backButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      paddingVertical: 8,
+      marginBottom: 18,
+    },
 
-  backText: {
-    color: '#111111',
-    fontSize: 15,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
+    backText: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: '600',
+      marginLeft: 8,
+    },
 
-  heading: {
-    color: '#111111',
-    fontSize: 30,
-    fontWeight: '700',
-  },
+    heading: {
+      color: colors.text,
+      fontSize: 30,
+      fontWeight: '700',
+    },
 
-  subheading: {
-    color: '#777777',
-    fontSize: 16,
-    lineHeight: 23,
-    marginTop: 8,
-  },
+    subheading: {
+      color: colors.textMuted,
+      fontSize: 16,
+      lineHeight: 23,
+      marginTop: 8,
+    },
 
-  suggestionCard: {
-    alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    borderRadius: 18,
-    padding: 24,
-    marginTop: 30,
-  },
+    suggestionCard: {
+      alignItems: 'center',
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 18,
+      padding: 24,
+      marginTop: 30,
+    },
 
-  iconContainer: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#111111',
-  },
+    iconContainer: {
+      width: 68,
+      height: 68,
+      borderRadius: 34,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+    },
 
-  suggestionTitle: {
-    color: '#111111',
-    fontSize: 23,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginTop: 20,
-  },
+    suggestionTitle: {
+      color: colors.text,
+      fontSize: 23,
+      fontWeight: '700',
+      textAlign: 'center',
+      marginTop: 20,
+    },
 
-  duration: {
-    color: '#287a45',
-    fontSize: 14,
-    fontWeight: '700',
-    marginTop: 8,
-  },
+    duration: {
+      color: colors.accent,
+      fontSize: 14,
+      fontWeight: '700',
+      marginTop: 8,
+    },
 
-  description: {
-    color: '#666666',
-    fontSize: 15,
-    lineHeight: 23,
-    textAlign: 'center',
-    marginTop: 14,
-  },
+    description: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 23,
+      textAlign: 'center',
+      marginTop: 14,
+    },
 
-  anotherButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#111111',
-    borderRadius: 12,
-    paddingVertical: 15,
-    marginTop: 20,
-  },
+    anotherButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      paddingVertical: 15,
+      marginTop: 20,
+    },
 
-  anotherButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-    marginLeft: 9,
-  },
+    anotherButtonText: {
+      color: colors.accentText,
+      fontSize: 15,
+      fontWeight: '600',
+      marginLeft: 9,
+    },
 
-  safetyText: {
-    color: '#888888',
-    fontSize: 13,
-    lineHeight: 19,
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});
+    safetyText: {
+      color: colors.textSubtle,
+      fontSize: 13,
+      lineHeight: 19,
+      textAlign: 'center',
+      marginTop: 20,
+    },
+  });
+}

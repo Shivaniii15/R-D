@@ -15,9 +15,10 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getJournals, deleteJournal } from '../storage/journal.storage';
 import { Journal } from '../types/journal.types';
 import { JournalStackParamList } from '../navigation/JournalNavigator';
-import { journalStyles as styles } from '../styles/journal.styles';
+import { createJournalStyles } from '../styles/journal.styles';
 import { getJournalInsights, InsightType, INSIGHT_TYPES } from '../services/gemini.service';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useTheme } from '../theme/ThemeContext';
 
 type NavProp = NativeStackNavigationProp<JournalStackParamList, 'JournalList'>;
 type ModalStep = 'selectType' | 'selectJournal' | 'loading' | 'result';
@@ -25,6 +26,9 @@ type ModalStep = 'selectType' | 'selectJournal' | 'loading' | 'result';
 const MAX_JOURNALS = 3;
 
 export default function JournalScreen(): React.JSX.Element {
+  const { colors } = useTheme();
+  const styles = createJournalStyles(colors);
+  const { scale } = useAccessibility();
   const [journals, setJournals] = useState<Journal[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStep, setModalStep] = useState<ModalStep>('selectType');
@@ -32,7 +36,6 @@ export default function JournalScreen(): React.JSX.Element {
   const [selectedJournals, setSelectedJournals] = useState<Journal[]>([]);
   const [insights, setInsights] = useState('');
   const navigation = useNavigation<NavProp>();
-  const { scale } = useAccessibility();
 
   useFocusEffect(
     useCallback(() => {
@@ -143,7 +146,7 @@ export default function JournalScreen(): React.JSX.Element {
       )}
 
       <TouchableOpacity style={styles.aiButton} onPress={openAIModal} activeOpacity={0.8}>
-        <Text style={styles.aiButtonText}>✦ AI Insights</Text>
+        <Text style={[styles.aiButtonText, { fontSize: scale(15) }]}>✦ AI Insights</Text>
       </TouchableOpacity>
 
       <Modal
@@ -154,26 +157,25 @@ export default function JournalScreen(): React.JSX.Element {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
 
-            {/* Step 1 — Select Insight Type */}
             {modalStep === 'selectType' && (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>AI Insights</Text>
+                  <Text style={[styles.modalTitle, { fontSize: scale(18) }]}>AI Insights</Text>
                   <TouchableOpacity onPress={closeModal}>
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>What kind of insights would you like?</Text>
+                <Text style={[styles.modalSubtitle, { fontSize: scale(13) }]}>What kind of insights would you like?</Text>
                 {INSIGHT_TYPES.map(item => (
                   <TouchableOpacity
                     key={item.type}
                     style={styles.typeCard}
                     onPress={() => handleSelectType(item.type)}
                     activeOpacity={0.7}>
-                    <Text style={styles.typeEmoji}>{item.emoji}</Text>
+                    <Text style={[styles.typeEmoji, { fontSize: scale(28) }]}>{item.emoji}</Text>
                     <View style={styles.typeTextContainer}>
-                      <Text style={styles.typeLabel}>{item.label}</Text>
-                      <Text style={styles.typeDescription}>{item.description}</Text>
+                      <Text style={[styles.typeLabel, { fontSize: scale(15) }]}>{item.label}</Text>
+                      <Text style={[styles.typeDescription, { fontSize: scale(12) }]}>{item.description}</Text>
                     </View>
                     <Text style={styles.typeArrow}>›</Text>
                   </TouchableOpacity>
@@ -181,19 +183,18 @@ export default function JournalScreen(): React.JSX.Element {
               </>
             )}
 
-            {/* Step 2 — Select Journals */}
             {modalStep === 'selectJournal' && (
               <>
                 <View style={styles.modalHeader}>
                   <TouchableOpacity onPress={() => setModalStep('selectType')}>
-                    <Text style={styles.modalBack}>← Back</Text>
+                    <Text style={[styles.modalBack, { fontSize: scale(14) }]}>← Back</Text>
                   </TouchableOpacity>
-                  <Text style={styles.modalTitle}>{selectedTypeInfo?.emoji} {selectedTypeInfo?.label}</Text>
+                  <Text style={[styles.modalTitle, { fontSize: scale(18) }]}>{selectedTypeInfo?.emoji} {selectedTypeInfo?.label}</Text>
                   <TouchableOpacity onPress={closeModal}>
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>
+                <Text style={[styles.modalSubtitle, { fontSize: scale(13) }]}>
                   Select up to {MAX_JOURNALS} journals ({selectedJournals.length} selected)
                 </Text>
                 <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
@@ -210,9 +211,9 @@ export default function JournalScreen(): React.JSX.Element {
                             {isSelected && <Text style={styles.modalCardCheckmark}>✓</Text>}
                           </View>
                           <View style={{ flex: 1 }}>
-                            <Text style={styles.modalCardTitle}>{journal.title}</Text>
-                            <Text style={styles.modalCardDate}>{formatDate(journal.createdAt)}</Text>
-                            <Text style={styles.modalCardBody} numberOfLines={2}>{journal.body}</Text>
+                            <Text style={[styles.modalCardTitle, { fontSize: scale(15) }]}>{journal.title}</Text>
+                            <Text style={[styles.modalCardDate, { fontSize: scale(11) }]}>{formatDate(journal.createdAt)}</Text>
+                            <Text style={[styles.modalCardBody, { fontSize: scale(13) }]} numberOfLines={2}>{journal.body}</Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -224,42 +225,40 @@ export default function JournalScreen(): React.JSX.Element {
                   onPress={handleAnalyse}
                   activeOpacity={0.8}
                   disabled={selectedJournals.length === 0}>
-                  <Text style={styles.analyseButtonText}>
+                  <Text style={[styles.analyseButtonText, { fontSize: scale(15) }]}>
                     Analyse {selectedJournals.length > 0 ? `${selectedJournals.length} ` : ''}Journal{selectedJournals.length !== 1 ? 's' : ''}
                   </Text>
                 </TouchableOpacity>
               </>
             )}
 
-            {/* Step 3 — Loading */}
             {modalStep === 'loading' && (
               <View style={styles.modalLoading}>
                 <ActivityIndicator size="large" color="#111" />
-                <Text style={styles.modalLoadingText}>
+                <Text style={[styles.modalLoadingText, { fontSize: scale(14) }]}>
                   Analysing {selectedJournals.length} journal{selectedJournals.length !== 1 ? 's' : ''}...
                 </Text>
               </View>
             )}
 
-            {/* Step 4 — Result */}
             {modalStep === 'result' && (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>{selectedTypeInfo?.emoji} {selectedTypeInfo?.label}</Text>
+                  <Text style={[styles.modalTitle, { fontSize: scale(18) }]}>{selectedTypeInfo?.emoji} {selectedTypeInfo?.label}</Text>
                   <TouchableOpacity onPress={closeModal}>
                     <Text style={styles.modalClose}>✕</Text>
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.modalSubtitle}>
+                <Text style={[styles.modalSubtitle, { fontSize: scale(13) }]}>
                   Based on {selectedJournals.length} journal{selectedJournals.length !== 1 ? 's' : ''}
                 </Text>
                 <ScrollView style={styles.modalList} showsVerticalScrollIndicator={false}>
-                  <Text style={styles.insightsText}>{insights}</Text>
+                  <Text style={[styles.insightsText, { fontSize: scale(15) }]}>{insights}</Text>
                 </ScrollView>
                 <TouchableOpacity
                   style={styles.modalBackButton}
                   onPress={() => setModalStep('selectType')}>
-                  <Text style={styles.modalBackButtonText}>← Try a different insight type</Text>
+                  <Text style={[styles.modalBackButtonText, { fontSize: scale(14) }]}>← Try a different insight type</Text>
                 </TouchableOpacity>
               </>
             )}
