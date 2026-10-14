@@ -8,6 +8,7 @@ import {
   AppStateStatus,
   StatusBar,
 } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import notifee, {
   EventType,
@@ -199,8 +200,10 @@ function AppContent(): React.JSX.Element {
 
 export default function App(): React.JSX.Element {
   return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

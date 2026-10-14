@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DisclaimerNotice from '../components/DisclaimerNotice';
+import FirstLaunchTutorial from '../components/FirstLaunchTutorial';
 import JournalNavigator from './JournalNavigator';
 import WellnessNavigator from './WellnessNavigator';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -40,6 +42,7 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
 
 function MainTabs(): React.JSX.Element {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -53,7 +56,15 @@ function MainTabs(): React.JSX.Element {
             {route.name}
           </Text>
         ),
-        tabBarStyle: [navigationStyles.tabBar, { backgroundColor: colors.background, borderTopColor: colors.border }],
+        tabBarStyle: [
+          navigationStyles.tabBar,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+            height: 64 + insets.bottom,
+            paddingBottom: 8 + insets.bottom,
+          },
+        ],
         tabBarItemStyle: navigationStyles.tabBarItem,
       })}>
       <Tab.Screen name="Home" component={HomeNavigator} />
@@ -65,9 +76,12 @@ function MainTabs(): React.JSX.Element {
 }
 
 export default function AppNavigator(): React.JSX.Element {
+  const [disclaimerDismissed, setDisclaimerDismissed] = useState(false);
+
   return (
     <>
-      <DisclaimerNotice />
+      <DisclaimerNotice onDismiss={() => setDisclaimerDismissed(true)} />
+      <FirstLaunchTutorial start={disclaimerDismissed} />
       <NavigationContainer ref={navigationRef} onReady={handleNavigationReady}>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           <RootStack.Screen name="MainTabs" component={MainTabs} />

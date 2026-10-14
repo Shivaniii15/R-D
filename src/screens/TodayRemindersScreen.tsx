@@ -21,8 +21,13 @@ import {
   getTodaysReminderCompleted,
   markTodaysReminderCompleted,
 } from '../storage/reminderCompletion.storage';
+import { useTheme } from '../theme/ThemeContext';
+import type { ThemeColors } from '../theme/ThemeContext';
 
 export default function TodayRemindersScreen(): React.JSX.Element {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   const [isCompleted, setIsCompleted] =
     useState<boolean>(false);
 
@@ -100,7 +105,7 @@ export default function TodayRemindersScreen(): React.JSX.Element {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
+          <ActivityIndicator size="large" color={colors.accent} />
         </View>
       </SafeAreaView>
     );
@@ -134,7 +139,7 @@ export default function TodayRemindersScreen(): React.JSX.Element {
               <Feather
                 name={isCompleted ? 'check' : 'heart'}
                 size={24}
-                color={isCompleted ? '#ffffff' : '#111111'}
+                color={isCompleted ? colors.accentText : colors.text}
               />
             </View>
 
@@ -164,7 +169,7 @@ export default function TodayRemindersScreen(): React.JSX.Element {
               <Feather
                 name="check-circle"
                 size={20}
-                color="#287a45"
+                color={colors.accent}
               />
 
               <Text style={styles.completedMessageText}>
@@ -183,14 +188,14 @@ export default function TodayRemindersScreen(): React.JSX.Element {
               {isUpdating ? (
                 <ActivityIndicator
                   size="small"
-                  color="#ffffff"
+                  color={colors.accentText}
                 />
               ) : (
                 <>
                   <Feather
                     name="check-circle"
                     size={19}
-                    color="#ffffff"
+                    color={colors.accentText}
                   />
 
                   <Text style={styles.completeButtonText}>
@@ -206,137 +211,139 @@ export default function TodayRemindersScreen(): React.JSX.Element {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-  },
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 40,
-  },
+    content: {
+      flexGrow: 1,
+      paddingHorizontal: 20,
+      paddingTop: 24,
+      paddingBottom: 40,
+    },
 
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  heading: {
-    color: '#111111',
-    fontSize: 30,
-    fontWeight: '700',
-  },
+    heading: {
+      color: colors.text,
+      fontSize: 30,
+      fontWeight: '700',
+    },
 
-  subheading: {
-    color: '#777777',
-    fontSize: 16,
-    lineHeight: 22,
-    marginTop: 6,
-    marginBottom: 28,
-  },
+    subheading: {
+      color: colors.textMuted,
+      fontSize: 16,
+      lineHeight: 22,
+      marginTop: 6,
+      marginBottom: 28,
+    },
 
-  reminderCard: {
-    backgroundColor: '#f7f7f7',
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: '#eeeeee',
-  },
+    reminderCard: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 16,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
 
-  completedCard: {
-    backgroundColor: '#f1faf4',
-    borderColor: '#bcdcc6',
-  },
+    completedCard: {
+      backgroundColor: colors.surfaceMuted,
+      borderColor: colors.border,
+    },
 
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+    cardHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#e8e8e8',
-  },
+    iconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.border,
+    },
 
-  completedIconContainer: {
-    backgroundColor: '#287a45',
-  },
+    completedIconContainer: {
+      backgroundColor: colors.accent,
+    },
 
-  headerTextContainer: {
-    flex: 1,
-    marginLeft: 14,
-  },
+    headerTextContainer: {
+      flex: 1,
+      marginLeft: 14,
+    },
 
-  reminderTitle: {
-    color: '#111111',
-    fontSize: 18,
-    fontWeight: '700',
-  },
+    reminderTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: '700',
+    },
 
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 4,
-  },
+    statusText: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginTop: 4,
+    },
 
-  pendingStatus: {
-    color: '#a06b00',
-  },
+    pendingStatus: {
+      color: colors.textMuted,
+    },
 
-  completedStatus: {
-    color: '#287a45',
-  },
+    completedStatus: {
+      color: colors.accent,
+    },
 
-  reminderDescription: {
-    color: '#666666',
-    fontSize: 15,
-    lineHeight: 22,
-    marginTop: 18,
-  },
+    reminderDescription: {
+      color: colors.textMuted,
+      fontSize: 15,
+      lineHeight: 22,
+      marginTop: 18,
+    },
 
-  completeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#111111',
-    borderRadius: 12,
-    paddingVertical: 14,
-    marginTop: 20,
-  },
+    completeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      paddingVertical: 14,
+      marginTop: 20,
+    },
 
-  completeButtonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
+    completeButtonText: {
+      color: colors.accentText,
+      fontSize: 15,
+      fontWeight: '600',
+      marginLeft: 8,
+    },
 
-  disabledButton: {
-    opacity: 0.5,
-  },
+    disabledButton: {
+      opacity: 0.5,
+    },
 
-  completedMessage: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#dff3e5',
-    borderRadius: 12,
-    padding: 14,
-    marginTop: 20,
-  },
+    completedMessage: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      padding: 14,
+      marginTop: 20,
+    },
 
-  completedMessageText: {
-    flex: 1,
-    color: '#287a45',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 9,
-  },
-});
+    completedMessageText: {
+      flex: 1,
+      color: colors.accent,
+      fontSize: 14,
+      fontWeight: '600',
+      marginLeft: 9,
+    },
+  });
+}
