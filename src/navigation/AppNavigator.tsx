@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import Feather from 'react-native-vector-icons/Feather';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DisclaimerNotice from '../components/DisclaimerNotice';
 import FirstLaunchTutorial from '../components/FirstLaunchTutorial';
 import JournalNavigator from './JournalNavigator';
@@ -41,6 +42,7 @@ function TabIcon({ name, focused }: TabIconProps): React.JSX.Element {
 
 function MainTabs(): React.JSX.Element {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -54,7 +56,15 @@ function MainTabs(): React.JSX.Element {
             {route.name}
           </Text>
         ),
-        tabBarStyle: [navigationStyles.tabBar, { backgroundColor: colors.background, borderTopColor: colors.border }],
+        tabBarStyle: [
+          navigationStyles.tabBar,
+          {
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+            height: 64 + insets.bottom,
+            paddingBottom: 8 + insets.bottom,
+          },
+        ],
         tabBarItemStyle: navigationStyles.tabBarItem,
       })}>
       <Tab.Screen name="Home" component={HomeNavigator} />

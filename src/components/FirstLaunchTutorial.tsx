@@ -40,8 +40,12 @@ const tutorialSteps = [
 
 export default function FirstLaunchTutorial({
   start,
+  forceShow = false,
+  onDismiss,
 }: {
   start: boolean;
+  forceShow?: boolean;
+  onDismiss?: () => void;
 }): React.JSX.Element {
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -57,12 +61,12 @@ export default function FirstLaunchTutorial({
 
     getTutorialCompleted()
       .then(completed => {
-        if (active && !completed) {
+        if (active && (forceShow || !completed)) {
           setVisible(true);
         }
       })
       .catch(() => {
-        if (active) {
+        if (active && forceShow) {
           setVisible(true);
         }
       });
@@ -70,11 +74,12 @@ export default function FirstLaunchTutorial({
     return () => {
       active = false;
     };
-  }, [start]);
+  }, [forceShow, start]);
 
   function dismissTutorial(): void {
     setVisible(false);
     setStepIndex(0);
+    onDismiss?.();
     setTutorialCompleted().catch(() => {
       Alert.alert(
         'Tutorial preference not saved',
@@ -169,7 +174,7 @@ function createStyles(colors: ThemeColors) {
       maxWidth: 420,
       padding: 24,
       borderRadius: 20,
-      backgroundColor: colors.surface,
+      backgroundColor: colors.background,
       borderWidth: 1,
       borderColor: colors.border,
       alignItems: 'center',

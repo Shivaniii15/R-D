@@ -19,3 +19,12 @@ export async function setTutorialCompleted(): Promise<void> {
     throw error;
   }
 }
+
+export async function resetTutorialCompleted(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(TUTORIAL_COMPLETED_KEY, 'false');
+  } catch (error) {
+    console.error('Failed to reset tutorial completion:', error);
+    throw error;
+  }
+}

@@ -166,7 +166,7 @@ export default function HomeScreen(): React.JSX.Element {
   const countLabel = isWeek ? 'Days Logged' : 'Weeks Logged';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* Crisis Support Banner */}

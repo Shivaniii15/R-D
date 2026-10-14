@@ -159,7 +159,7 @@ export default function ResourcesScreen(): React.JSX.Element {
       <View style={styles.header}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
-            <Feather name="arrow-left" size={22} color="#111" />
+            <Feather name="arrow-left" size={22} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.heading}>Resources</Text>
         </View>

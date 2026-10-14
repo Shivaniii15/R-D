@@ -40,10 +40,6 @@ import { ThemeColors, useTheme } from '../theme/ThemeContext';
 export default function ActivityReminderSettings(): React.JSX.Element {
   const { colors } = useTheme();
 
-  const toggleTrackOff = '#D9E8DD';
-  const toggleTrackOn = '#587F69';
-  const toggleThumbOff = '#FFFDF9';
-  const toggleThumbOn = '#587F69';
   const styles = createActivityReminderStyles(colors);
   const [enabled, setEnabled] =
     useState(false);
@@ -294,13 +290,13 @@ export default function ActivityReminderSettings(): React.JSX.Element {
           onValueChange={handleToggle}
           disabled={isUpdating}
           trackColor={{
-            false: toggleTrackOff,
-            true: toggleTrackOn,
+            false: colors.border,
+            true: colors.accent,
           }}
           thumbColor={
             enabled
-              ? toggleThumbOn
-              : toggleThumbOff
+              ? colors.accent
+              : colors.surface
           }
         />
       </View>
