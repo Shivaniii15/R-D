@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -57,6 +57,34 @@ export default function NewJournalScreen(): React.JSX.Element {
   const [imageUri, setImageUri] = useState<string | null>(null);
   const navigation = useNavigation<NavProp>();
 
+  useEffect(() => {
+    Voice.onSpeechStart = () => setIsListening(true);
+    Voice.onSpeechEnd = () => setIsListening(false);
+    Voice.onSpeechResults = event => {
+      const recognizedText = event.value?.[0]?.trim();
+      if (recognizedText) {
+        setBody(currentBody =>
+          currentBody
+            ? `${currentBody.trimEnd()} ${recognizedText}`
+            : recognizedText,
+        );
+      }
+    };
+    Voice.onSpeechError = event => {
+      setIsListening(false);
+      Alert.alert(
+        'Voice input unavailable',
+        event.error?.message ?? 'Speech recognition could not start. Please try again.',
+      );
+    };
+
+    return () => {
+      Voice.destroy()
+        .then(() => Voice.removeAllListeners())
+        .catch(error => console.warn('Failed to clean up speech recognition:', error));
+    };
+  }, []);
+
   async function handleSave() {
     if (!title.trim()) {
       Alert.alert('Title required', 'Please enter a title.');
@@ -83,11 +111,15 @@ export default function NewJournalScreen(): React.JSX.Element {
         setIsListening(false);
       } else {
         await Voice.start('en-NZ');
-        setIsListening(true);
       }
-    } catch (e) {
-      console.log('Voice error:', e);
+    } catch (error) {
       setIsListening(false);
+      Alert.alert(
+        'Voice input unavailable',
+        error instanceof Error
+          ? error.message
+          : 'Speech recognition could not start. Please try again.',
+      );
     }
   }
 
