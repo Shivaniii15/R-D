@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Feather from 'react-native-vector-icons/Feather';
 import { useAccessibility } from '../context/AccessibilityContext';
+import { useTheme } from '../theme/ThemeContext';
 
 type Phase = 'inhale' | 'hold-in' | 'exhale' | 'hold-out';
 
@@ -50,6 +51,7 @@ const phases: Record<Phase, PhaseConfig> = {
 export default function BreathingScreen(): React.JSX.Element {
   const navigation = useNavigation();
   const { scale } = useAccessibility();
+  const { colors } = useTheme();
   const [isRunning, setIsRunning] = useState(false);
   const [currentPhase, setCurrentPhase] = useState<Phase>('inhale');
   const [countdown, setCountdown] = useState(4);
@@ -127,26 +129,26 @@ export default function BreathingScreen(): React.JSX.Element {
   const phase = phases[currentPhase];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={{
         paddingHorizontal: 20,
         paddingTop: 20,
         paddingBottom: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: colors.border,
         flexDirection: 'row',
         alignItems: 'center',
       }}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
-          <Feather name="arrow-left" size={scale(22)} color="#111" />
+          <Feather name="arrow-left" size={scale(22)} color={colors.text} />
         </TouchableOpacity>
-        <Text style={{ fontSize: scale(20), fontWeight: '700', color: '#111' }}>Box Breathing</Text>
+        <Text style={{ fontSize: scale(20), fontWeight: '700', color: colors.text }}>Box Breathing</Text>
       </View>
 
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
 
         {!isRunning && (
-          <Text style={{ fontSize: scale(14), color: '#aaa', textAlign: 'center', marginBottom: 8 }}>
+          <Text style={{ fontSize: scale(14), color: colors.textMuted, textAlign: 'center', marginBottom: 8 }}>
             Box breathing helps reduce stress and anxiety by calming your nervous system. Each phase lasts 4 seconds.
           </Text>
         )}
@@ -157,16 +159,16 @@ export default function BreathingScreen(): React.JSX.Element {
           width: 200,
           height: 200,
           borderRadius: 100,
-          backgroundColor: '#D4EDDA',
+          backgroundColor: colors.surfaceMuted,
           alignItems: 'center',
           justifyContent: 'center',
           transform: [{ scale: scaleAnim }],
         }}>
-          <Text style={{ fontSize: scale(32), fontWeight: '700', color: '#111' }}>
+          <Text style={{ fontSize: scale(32), fontWeight: '700', color: colors.text }}>
             {isRunning ? countdown : ''}
           </Text>
           {!isRunning && (
-            <Text style={{ fontSize: scale(14), color: '#555' }}>Press start</Text>
+            <Text style={{ fontSize: scale(14), color: colors.textMuted }}>Press start</Text>
           )}
         </Animated.View>
 
@@ -174,13 +176,13 @@ export default function BreathingScreen(): React.JSX.Element {
 
         {isRunning && (
           <>
-            <Text style={{ fontSize: scale(24), fontWeight: '700', color: '#111', marginBottom: 8 }}>
+            <Text style={{ fontSize: scale(24), fontWeight: '700', color: colors.text, marginBottom: 8 }}>
               {phase.label}
             </Text>
-            <Text style={{ fontSize: scale(15), color: '#aaa', textAlign: 'center', marginBottom: 8 }}>
+            <Text style={{ fontSize: scale(15), color: colors.textMuted, textAlign: 'center', marginBottom: 8 }}>
               {phase.instruction}
             </Text>
-            <Text style={{ fontSize: scale(13), color: '#bbb' }}>
+            <Text style={{ fontSize: scale(13), color: colors.textSubtle }}>
               Cycles completed: {cyclesCompleted}
             </Text>
           </>
@@ -191,12 +193,12 @@ export default function BreathingScreen(): React.JSX.Element {
         <TouchableOpacity
           onPress={handleStartStop}
           style={{
-            backgroundColor: '#111',
+            backgroundColor: colors.accent,
             paddingVertical: 16,
             paddingHorizontal: 60,
             borderRadius: 14,
           }}>
-          <Text style={{ color: '#fff', fontSize: scale(16), fontWeight: '600' }}>
+          <Text style={{ color: colors.accentText, fontSize: scale(16), fontWeight: '600' }}>
             {isRunning ? 'Stop' : 'Start'}
           </Text>
         </TouchableOpacity>

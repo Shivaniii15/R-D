@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { ThemeColors } from '../theme/ThemeContext';
+import type { ThemeColors } from '../theme/ThemeContext';
 
 export function createMoodHistoryStyles(colors: ThemeColors) {
   return StyleSheet.create({
@@ -76,7 +76,9 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
       marginTop: 20,
       padding: 18,
       borderRadius: 12,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.surfaceMuted,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
     detailsHeader: {
       flexDirection: 'row',
@@ -84,12 +86,12 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
       alignItems: 'center',
     },
     detailsTitle: {
-      color: colors.accentText,
+      color: colors.text,
       fontSize: 16,
       fontWeight: '700',
     },
     closeText: {
-      color: colors.tabInactive,
+      color: colors.textSubtle,
       fontSize: 13,
     },
     detailsDate: {
@@ -98,24 +100,24 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
       marginTop: 16,
     },
     detailsMood: {
-      color: colors.accentText,
+      color: colors.text,
       fontSize: 38,
       fontWeight: '700',
       marginTop: 8,
     },
     detailsDescription: {
-      color: colors.tabInactive,
+      color: colors.textMuted,
       fontSize: 14,
       marginTop: 2,
     },
     notesLabel: {
-      color: colors.accentText,
+      color: colors.text,
       fontSize: 14,
       fontWeight: '600',
       marginTop: 18,
     },
     notesText: {
-      color: colors.tabInactive,
+      color: colors.textSubtle,
       fontSize: 13,
       lineHeight: 19,
       marginTop: 5,
@@ -132,7 +134,7 @@ export function createMoodHistoryStyles(colors: ThemeColors) {
       fontWeight: '700',
     },
     emptyText: {
-      color: colors.textMuted,
+      color: colors.textSubtle,
       fontSize: 14,
       lineHeight: 20,
       textAlign: 'center',

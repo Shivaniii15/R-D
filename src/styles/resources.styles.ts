@@ -30,14 +30,14 @@ export function createResourceStyles(colors: ThemeColors) {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.surfaceMuted,
   },
   categoryButtonActive: {
     backgroundColor: colors.accent,
   },
   categoryText: {
     fontSize: 13,
-    color: '#aaa',
+    color: colors.textSubtle,
     fontWeight: '500',
   },
   categoryTextActive: {
@@ -72,7 +72,7 @@ export function createResourceStyles(colors: ThemeColors) {
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#aaa',
+    color: colors.textSubtle,
     marginTop: 3,
   },
   });

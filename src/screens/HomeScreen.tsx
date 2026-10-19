@@ -183,7 +183,7 @@ export default function HomeScreen(): React.JSX.Element {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* Crisis Support Banner */}

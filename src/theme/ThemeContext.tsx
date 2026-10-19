@@ -20,29 +20,29 @@ export interface ThemeColors {
 }
 
 const lightColors: ThemeColors = {
-  background: '#ffffff',
-  surface: '#ffffff',
-  surfaceMuted: '#f7f7f7',
-  border: '#f0f0f0',
-  text: '#111111',
-  textMuted: '#666666',
-  textSubtle: '#888888',
-  accent: '#111111',
-  accentText: '#ffffff',
-  tabInactive: '#bbbbbb',
+  background: '#F9F3EA',
+  surface: '#FFFDF9',
+  surfaceMuted: '#EEF5EF',
+  border: '#D9E8DD',
+  text: '#21362F',
+  textMuted: '#49645B',
+  textSubtle: '#738B82',
+  accent: '#4C7F6B',
+  accentText: '#F7FCF9',
+  tabInactive: '#A2B4AE',
 };
 
 const darkColors: ThemeColors = {
-  background: '#111111',
-  surface: '#1d1d1d',
-  surfaceMuted: '#242424',
-  border: '#353535',
-  text: '#f5f5f5',
-  textMuted: '#c5c5c5',
-  textSubtle: '#999999',
-  accent: '#f5f5f5',
-  accentText: '#111111',
-  tabInactive: '#777777',
+  background: '#14241E',
+  surface: '#1C2F2A',
+  surfaceMuted: '#233C35',
+  border: '#33564D',
+  text: '#ECF7F2',
+  textMuted: '#C3DAD0',
+  textSubtle: '#9AB6AE',
+  accent: '#587F69',
+  accentText: '#122821',
+  tabInactive: '#70897F',
 };
 
 interface ThemeContextValue {

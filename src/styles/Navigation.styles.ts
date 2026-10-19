@@ -2,9 +2,9 @@ import { StyleSheet, ViewStyle } from 'react-native';
 
 export const navigationStyles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#fff',
+    backgroundColor: '#F9F3EA',
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#E7D9C6',
     height: 64,
     paddingBottom: 8,
     paddingTop: 8,

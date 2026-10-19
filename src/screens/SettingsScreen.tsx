@@ -52,7 +52,11 @@ import {
 } from '../services/sleepNotification.service';
 
 import ActivityReminderSettings from '../components/ActivityReminderSettings';
+import FirstLaunchTutorial from '../components/FirstLaunchTutorial';
 import MotivationalReminderSettings from '../components/MotivationalReminderSettings';
+import {
+  resetTutorialCompleted,
+} from '../storage/tutorial.storage';
 import {
   useTheme,
 } from '../theme/ThemeContext';
@@ -114,6 +118,24 @@ export default function SettingsScreen(): React.JSX.Element {
     showSleepTimePicker,
     setShowSleepTimePicker,
   ] = useState<boolean>(false);
+
+  const [
+    tutorialLaunchKey,
+    setTutorialLaunchKey,
+  ] = useState<number>(0);
+
+  async function handleViewTutorialAgain(): Promise<void> {
+    try {
+      await resetTutorialCompleted();
+      setTutorialLaunchKey(previous => previous + 1);
+    } catch (error) {
+      console.log('Failed to reopen tutorial:', error);
+      Alert.alert(
+        'Unable to reopen tutorial',
+        'The tutorial could not be started again right now.',
+      );
+    }
+  }
 
   async function handleDarkModeToggle(
     enabled: boolean,
@@ -550,6 +572,12 @@ export default function SettingsScreen(): React.JSX.Element {
           Control your application preferences.
         </Text>
 
+        <Pressable
+          style={styles.tutorialButton}
+          onPress={handleViewTutorialAgain}>
+          <Text style={styles.tutorialButtonText}>View tutorial again</Text>
+        </Pressable>
+
         <Text
           style={styles.sectionHeading}>
           Appearance
@@ -586,11 +614,11 @@ export default function SettingsScreen(): React.JSX.Element {
             onValueChange={handleDarkModeToggle}
             trackColor={{
               false: colors.border,
-              true: colors.textMuted,
+              true: colors.accent,
             }}
             thumbColor={
               isDarkMode
-                ? colors.text
+                ? colors.accent
                 : colors.surface
             }
           />
@@ -635,13 +663,13 @@ export default function SettingsScreen(): React.JSX.Element {
             }
             disabled={isUpdatingMood}
             trackColor={{
-              false: '#d5d5d5',
-              true: '#777777',
+              false: colors.border,
+              true: colors.accent,
             }}
             thumbColor={
               remindersEnabled
-                ? '#111111'
-                : '#f4f4f4'
+                ? colors.accent
+                : colors.surface
             }
           />
         </View>
@@ -757,13 +785,13 @@ export default function SettingsScreen(): React.JSX.Element {
               isUpdatingSleep
             }
             trackColor={{
-              false: '#d5d5d5',
-              true: '#777777',
+              false: colors.border,
+              true: colors.accent,
             }}
             thumbColor={
               sleepRemindersEnabled
-                ? '#111111'
-                : '#f4f4f4'
+                ? colors.accent
+                : colors.surface
             }
           />
         </View>
@@ -841,6 +869,13 @@ export default function SettingsScreen(): React.JSX.Element {
             </Text>
           </Pressable>
         </View>
+
+        <FirstLaunchTutorial
+          key={tutorialLaunchKey}
+          start={tutorialLaunchKey > 0}
+          forceShow
+          onDismiss={() => setTutorialLaunchKey(0)}
+        />
 
         <ActivityReminderSettings />
 
@@ -931,6 +966,21 @@ function createStyles(colors: ThemeColors) {
       fontWeight: '700',
       marginTop: 10,
       marginBottom: 12,
+    },
+
+    tutorialButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      paddingVertical: 14,
+      marginBottom: 18,
+    },
+
+    tutorialButtonText: {
+      color: colors.accentText,
+      fontSize: 15,
+      fontWeight: '600',
     },
 
     settingCard: {

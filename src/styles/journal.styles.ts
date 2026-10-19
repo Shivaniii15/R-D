@@ -34,13 +34,13 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     cancel: {
       fontSize: 15,
-      color: '#aaa',
+      color: colors.textSubtle,
       width: 60,
     },
     saveText: {
       fontSize: 15,
       fontWeight: '600',
-      color: colors.text,
+      color: colors.accent,
       width: 60,
       textAlign: 'right',
     },
@@ -50,7 +50,7 @@ export function createJournalStyles(colors: ThemeColors) {
       justifyContent: 'center',
     },
     emptyText: {
-      color: '#aaa',
+      color: colors.textSubtle,
       fontSize: 15,
     },
     list: {
@@ -79,12 +79,12 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     cardDate: {
       fontSize: 12,
-      color: '#aaa',
+      color: colors.textSubtle,
       marginBottom: 6,
     },
     cardBody: {
       fontSize: 14,
-      color: '#555',
+      color: colors.textMuted,
       lineHeight: 20,
     },
     deleteButton: {
@@ -103,7 +103,7 @@ export function createJournalStyles(colors: ThemeColors) {
     titleInput: {
       fontSize: 22,
       fontWeight: '600',
-      color: '#111',
+      color: colors.text,
       paddingVertical: 8,
     },
     divider: {
@@ -177,13 +177,13 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     modalBack: {
       fontSize: 14,
-      color: '#aaa',
+      color: colors.textSubtle,
       fontWeight: '500',
       width: 60,
     },
     modalClose: {
       fontSize: 18,
-      color: '#aaa',
+      color: colors.textSubtle,
       fontWeight: '600',
       padding: 4,
       width: 60,
@@ -191,7 +191,7 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     modalSubtitle: {
       fontSize: 13,
-      color: '#aaa',
+      color: colors.textSubtle,
       marginBottom: 16,
       textAlign: 'center',
     },
@@ -223,11 +223,11 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     typeDescription: {
       fontSize: 12,
-      color: '#aaa',
+      color: colors.textSubtle,
     },
     typeArrow: {
       fontSize: 22,
-      color: '#bbb',
+      color: colors.tabInactive,
       marginLeft: 8,
     },
     modalCard: {
@@ -252,7 +252,7 @@ export function createJournalStyles(colors: ThemeColors) {
       height: 22,
       borderRadius: 6,
       borderWidth: 2,
-      borderColor: '#ddd',
+      borderColor: colors.border,
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 2,
@@ -271,12 +271,12 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     modalCardDate: {
       fontSize: 11,
-      color: '#aaa',
+      color: colors.textSubtle,
       marginBottom: 5,
     },
     modalCardBody: {
       fontSize: 13,
-      color: '#555',
+      color: colors.textMuted,
       lineHeight: 18,
     },
     analyseButton: {
@@ -300,7 +300,7 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     modalLoadingText: {
       fontSize: 14,
-      color: '#aaa',
+      color: colors.textSubtle,
       marginTop: 12,
     },
     insightsText: {
@@ -315,7 +315,7 @@ export function createJournalStyles(colors: ThemeColors) {
     },
     modalBackButtonText: {
       fontSize: 14,
-      color: '#aaa',
+      color: colors.textSubtle,
       fontWeight: '500',
     },
   });

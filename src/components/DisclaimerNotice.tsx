@@ -3,7 +3,11 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet, BackHandler } from 're
 import { useTheme } from '../theme/ThemeContext';
 import type { ThemeColors } from '../theme/ThemeContext';
 
-export default function DisclaimerNotice(): React.JSX.Element {
+export default function DisclaimerNotice({
+  onDismiss,
+}: {
+  onDismiss?: () => void;
+}): React.JSX.Element {
   const [visible, setVisible] = useState(true);
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -27,7 +31,10 @@ export default function DisclaimerNotice(): React.JSX.Element {
 
             <TouchableOpacity
               style={[styles.button, styles.understandButton]}
-              onPress={() => setVisible(false)}
+              onPress={() => {
+                setVisible(false);
+                onDismiss?.();
+              }}
             >
               <Text style={styles.buttonText}>I Understand</Text>
             </TouchableOpacity>
@@ -52,8 +59,10 @@ function createStyles(colors: ThemeColors) {
   card: {
     backgroundColor: colors.surface,
     padding: 24,
-    borderRadius: 12,
+    borderRadius: 20,
     width: '100%',
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   title: {
     fontSize: 20,
@@ -86,7 +95,7 @@ function createStyles(colors: ThemeColors) {
   },
 
   exitButton: {
-    backgroundColor: '#e74c3c',
+    backgroundColor: colors.surfaceMuted,
   },
 
   buttonText: {
@@ -96,8 +105,8 @@ function createStyles(colors: ThemeColors) {
   },
 
   exitButtonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: colors.textMuted,
+    fontWeight: '600',
     fontSize: 15,
   },
   });
